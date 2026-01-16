@@ -31,24 +31,6 @@
                         "theme": "dark"
                     }
                 },
-                "bootstrap": {
-                    "primary": {
-                        "class": "bg-primary",
-                        "theme": "dark"
-                    },
-                    "dark": {
-                        "class": "bg-dark",
-                        "theme": "dark"
-                    },
-                    "light": {
-                        "class": "bg-light",
-                        "theme": "light"
-                    },
-                    "tertiary": {
-                        "class": "bg-body-tertiary",
-                        "theme": ""
-                    }
-                },
                 "flatly": {
                     "primary": {
                         "class": "bg-primary",
@@ -176,6 +158,186 @@
                     }
                 },
                 "united": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "darkly": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "lumen": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "lux": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "materia": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "minty": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "pulse": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "sketchy": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "sandstone": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "spacelab": {
+                    "primary": {
+                        "class": "bg-primary",
+                        "theme": "dark"
+                    },
+                    "dark": {
+                        "class": "bg-dark",
+                        "theme": "dark"
+                    },
+                    "light": {
+                        "class": "bg-light",
+                        "theme": "light"
+                    },
+                    "tertiary": {
+                        "class": "bg-body-tertiary",
+                        "theme": ""
+                    }
+                },
+                "yeti": {
                     "primary": {
                         "class": "bg-primary",
                         "theme": "dark"

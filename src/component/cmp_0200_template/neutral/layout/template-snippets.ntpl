@@ -2,8 +2,8 @@
 
 
 {:snip; current:template:nav-cache-key >>
-    {:;local::current->theme->theme:}
-    {:;local::current->theme->color:}
+    {:*  {:;local::current->theme->theme:}
+    {:;local::current->theme->color:}  *:}
     {:;HAS_SESSION:}
 :}
 

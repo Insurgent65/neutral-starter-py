@@ -63,7 +63,17 @@
                         "united",
                         "brite",
                         "cerulean",
-                        "journal"
+                        "journal",
+                        "darkly",
+                        "lumen",
+                        "lux",
+                        "materia",
+                        "minty",
+                        "pulse",
+                        "sandstone",
+                        "sketchy",
+                        "spacelab",
+                        "yeti"
                     ],
                     "allow_colors": [
                         "primary",
