@@ -3,6 +3,7 @@
 {:snip; current:template:head:theme_0yt2sa >>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/{:;local::current->theme->theme:}/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{:;current->site->static:}css/neutral-custom.min.css" />
+    {:snip; current:template:heading-medium :}
 :}
 
 {:snip; current:template:body-end:theme_0yt2sa >>
