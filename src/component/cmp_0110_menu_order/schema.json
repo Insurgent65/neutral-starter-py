@@ -6,7 +6,6 @@
                     "session:": {
                         "main": {},
                         "user": {},
-                        "theme": {},
                         "rrss": {},
                         "setting": {},
                         "info": {}
@@ -14,7 +13,6 @@
                     "session:true": {
                         "main": {},
                         "user": {},
-                        "theme": {},
                         "rrss": {},
                         "setting": {},
                         "info": {}

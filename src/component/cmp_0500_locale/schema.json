@@ -39,14 +39,14 @@
                     "session:": {
                         "setting": {
                             "name": "Setting",
-                            "tabs": "language",
+                            "tabs": "setting",
                             "icon": "x-icon-setting"
                         }
                     },
                     "session:true": {
                         "setting": {
                             "name": "Setting",
-                            "tabs": "language",
+                            "tabs": "setting",
                             "icon": "x-icon-setting"
                         }
                     }

@@ -20,35 +20,17 @@
             }
         },
         "data": {
-            "drawer": {
-                "menu": {
-                    "session:": {
-                        "setting": {
-                            "name": "Setting",
-                            "tabs": "setting",
-                            "icon": "x-icon-setting"
-                        }
-                    },
-                    "session:true": {
-                        "setting": {
-                            "name": "Setting",
-                            "tabs": "setting",
-                            "icon": "x-icon-setting"
-                        }
-                    }
-                }
-            },
             "menu": {
                 "session:": {
                     "setting": {
-                        "theme": "settheme_0yt2sa-menu-theme",
-                        "color": "settheme_0yt2sa-menu-theme-colors"
+                        "settheme": "settheme_0yt2sa-menu-theme",
+                        "setcolor": "settheme_0yt2sa-menu-theme-colors"
                     }
                 },
                 "session:true": {
                     "setting": {
-                        "theme": "settheme_0yt2sa-menu-theme",
-                        "color": "settheme_0yt2sa-menu-theme-colors"
+                        "settheme": "settheme_0yt2sa-menu-theme",
+                        "setcolor": "settheme_0yt2sa-menu-theme-colors"
                     }
                 }
             },
