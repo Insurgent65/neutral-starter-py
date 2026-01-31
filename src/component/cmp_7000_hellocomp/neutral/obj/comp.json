@@ -1,0 +1,9 @@
+{
+    "engine": "Python",
+    "file": "{:;hellocomp_0yt2sa->path:}/src/comp.py",
+    "schema": false,
+    "venv": "{:;VENV_DIR:}",
+    "params": {},
+    "callback": "main",
+    "template": ""
+}

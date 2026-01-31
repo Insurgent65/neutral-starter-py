@@ -15,7 +15,7 @@
         <h3>{:trans; {:;hello-component->hello:} :}</h3>
         <p>{:trans; Example of a simple component :}</p>
     </div>
-    <div class="{:;local::current->theme->class->container:} mt-5">
+    <div class="{:;local::current->theme->class->container:} mt-3">
         {:snip; hellocomp_0yt2sa-info :}
     </div>
 :}

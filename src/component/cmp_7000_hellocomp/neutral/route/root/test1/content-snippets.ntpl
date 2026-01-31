@@ -42,7 +42,7 @@
     <div class="{:;local::current->theme->class->container:}">
         {:snip; hellocomp_0yt2sa-test :}
     </div>
-    <div class="{:;local::current->theme->class->container:} mt-5">
+    <div class="{:;local::current->theme->class->container:} mt-3">
         {:snip; hellocomp_0yt2sa-info :}
     </div>
 :}
