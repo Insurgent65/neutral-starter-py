@@ -52,7 +52,7 @@
     :}
     <div class="text-center text-md-start">
         {:each; local::rrss_urls name url >>
-            <a href="/rrss/rss/{:;name:}" class="btn btn-sm btn-light my-1 me-1 me-md-2 click-load-spin {:;local::x-icon-rss:} {:snip; rrss:btn-text-muted:{:;name:} :}"> {:;name:}</a>
+            <a href="{:;rrss_0yt2sa->manifest->route:}/rss/{:;name:}" class="btn btn-sm btn-light my-1 me-1 me-md-2 click-load-spin {:;local::x-icon-rss:} {:snip; rrss:btn-text-muted:{:;name:} :}"> {:;name:}</a>
         :}
     </div>
 :}
