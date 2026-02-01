@@ -60,3 +60,4 @@ coverage.xml
 .DS_Store
 docs/_build/
 .idea/
+.agent

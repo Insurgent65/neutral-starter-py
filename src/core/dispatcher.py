@@ -45,6 +45,7 @@ class Dispatcher:
         session_id, session_cookie = self.session.get()
         self.schema_data['CONTEXT']['SESSION'] = session_id
         self.schema_data['HAS_SESSION'] = "true" if session_id else None
+        self.schema_data['HAS_SESSION_STR'] = "true" if session_id else "false"
         self.parse_utoken()
         self.schema_data['script_container_hash'] = sbase64url_md5(self.schema_data['CONTEXT']['UTOKEN'])
         self.schema_data['LTOKEN'] = ltoken_create(self.schema_data['CONTEXT']['UTOKEN'])
