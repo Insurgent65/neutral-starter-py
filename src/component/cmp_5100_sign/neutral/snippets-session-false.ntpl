@@ -1,0 +1,85 @@
+
+
+{:*
+    Sign forms modal
+    ----------------
+*:}
+
+{:snip; sign:modal-buttons >>
+    <button type="button" class="mx-0 btn btn-light btn-sm {:;local::x-icon-sign-reminder:}" data-bs-toggle="modal" data-bs-target="#reminderModal" {:param; disabled-reminder :}> {:trans; Reminder :}</button>
+    <button type="button" class="mx-0 me-1 btn btn-light btn-sm {:;local::x-icon-sign-in:} ms-auto" data-bs-toggle="modal" data-bs-target="#loginModal" {:param; disabled-login :}> {:trans; Sign in :}</button>
+    <button type="button" class="mx-0 btn btn-light btn-sm {:;local::x-icon-sign-up:}" data-bs-toggle="modal" data-bs-target="#registerModal" {:param; disabled-register :}> {:trans; Sign up :}</button>
+:}
+
+{:snip; sign:template-modals >>
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="loginModalLabel">{:trans; Sign in :}</h1>
+                    {:snip; util:modal-back-button :}
+                </div>
+                <div class="modal-body px-2 mx-md-3 my-md-2">
+                    {:fetch; |/sign/in/form/{:;LTOKEN:}|visible| >>
+                        <div class="text-center p-5">{:snip; spin-2x :}</div>
+                    :}
+                </div>
+                <div class="modal-footer">
+                    {:code;
+                        {:param; disabled-login >> disabled :}
+                        {:snip; sign:modal-buttons :}
+                    :}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="registerModalLabel">{:trans; Sign up :}</h1>
+                    {:snip; util:modal-back-button :}
+                </div>
+                <div class="modal-body px-2 mx-md-3 my-md-2">
+                    {:fetch; |/sign/up/form/{:;LTOKEN:}|visible| >>
+                        <div class="text-center p-5">{:snip; spin-2x :}</div>
+                    :}
+                </div>
+                <div class="modal-footer">
+                    {:code;
+                        {:param; disabled-register >> disabled :}
+                        {:snip; sign:modal-buttons :}
+                    :}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="reminderModalLabel">{:trans; Reminder :}</h1>
+                    {:snip; util:modal-back-button :}
+                </div>
+                <div class="modal-body px-2 mx-md-3 my-md-2">
+                    {:fetch; |/sign/reminder/form/{:;LTOKEN:}|visible| >>
+                        <div class="text-center p-5">{:snip; spin-2x :}</div>
+                    :}
+                </div>
+                <div class="modal-footer">
+                    {:code;
+                        {:param; disabled-reminder >> disabled :}
+                        {:snip; sign:modal-buttons :}
+                    :}
+                </div>
+            </div>
+        </div>
+    </div>
+:}
+
+
+{:moveto; /body >>
+    {:snip; sign:template-modals :}
+:}

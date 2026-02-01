@@ -1,0 +1,26 @@
+{
+    "_comment_:navbar:menu": "Avoid using duplicate modal in navbar",
+    "data": {
+        "navbar": {
+            "menu": {
+                "session:": {
+                    "signin": {
+                        "class": "disabled",
+                        "prop": null
+                    },
+                    "signup": {
+                        "class": "disabled",
+                        "prop": null
+                    }
+                }
+            }
+        },
+        "current": {
+            "route": {
+                "title": "Sign up",
+                "description": "Sign up",
+                "h1": "Sign up"
+            }
+        }
+    }
+}

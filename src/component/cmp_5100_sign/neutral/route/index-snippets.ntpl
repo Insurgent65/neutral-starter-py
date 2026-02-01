@@ -1,0 +1,11 @@
+{:* Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE) *:}
+
+{:!locale; #/locale-{:lang;:}.json :}
+
+{:!include; {:flg; require :} >> #/snippets.ntpl :}
+
+{:*
+    Disable carousel
+    ----------------
+*:}
+{:snip; current:template:body-carousel >> :}
