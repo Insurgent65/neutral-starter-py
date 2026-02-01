@@ -8,7 +8,7 @@ import regex as re
 from app.config import Config
 from constants import NOW
 
-from .sbase64url import sbase64url_md5
+from .sbase64url import sbase64url_sha256
 
 
 # Get user token or create if it does not exist.
@@ -104,11 +104,11 @@ def utoken_valid(utoken):
 
 def ltoken_create(token, secret=Config.SECRET_KEY) -> str:
     """
-    Create a link token using MD5 hash.
+    Create a link token using SHA-256 hash.
     Returns base64url encoded token string.
     """
     str_token = str(token) + str(secret)
-    return sbase64url_md5(str_token)
+    return sbase64url_sha256(str_token)
 
 
 def ltoken_check(ltoken, token, secret=Config.SECRET_KEY) -> bool:
@@ -117,7 +117,7 @@ def ltoken_check(ltoken, token, secret=Config.SECRET_KEY) -> bool:
     Returns True if provided token matches expected hash.
     """
     str_token = str(token) + str(secret)
-    route_token = sbase64url_md5(str_token)
+    route_token = sbase64url_sha256(str_token)
     if route_token == ltoken:
         return True
     return False

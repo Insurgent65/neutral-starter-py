@@ -48,7 +48,7 @@ def ftoken_check(field_key_name, data, user_token) -> bool:
     if NOW > int(expire):
         return False
 
-    key = hashlib.md5(field_key.encode()).hexdigest()
+    key = hashlib.sha256(field_key.encode()).hexdigest()
     hash_string = str(key) + str(expire) + str(Config.SECRET_KEY) + str(user_token)
     b64_hash = sbase64url_sha256(hash_string)
 

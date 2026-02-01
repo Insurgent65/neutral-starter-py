@@ -22,7 +22,7 @@
                 clearTimeout(renew_ftoken[e.dataset.ftokenid]);
                 if (e.value.trim() !== "") {
                     let ftoken = document.getElementById(e.dataset.ftokenid)
-                    let url = ftoken.dataset.url + '/' + CryptoJS.MD5(e.value).toString() + '/' + e.dataset.ftokenid + '/' + e.form.id;
+                    let url = ftoken.dataset.url + '/' + CryptoJS.SHA256(e.value).toString() + '/' + e.dataset.ftokenid + '/' + e.form.id;
                     neutral_fetch(ftoken, url, ftoken.dataset.wrap);
                     renew_ftoken[e.dataset.ftokenid] = setTimeout(() => {
                         // Renew token before expiration
@@ -45,9 +45,9 @@
         });
     }
 
-    function sbase64url_md5_encode(str) {
-        const md5 = CryptoJS.MD5(str);
-        const base64 = md5.toString(CryptoJS.enc.Base64);
+    function sbase64url_sha256_encode(str) {
+        const sha256 = CryptoJS.SHA256(str);
+        const base64 = sha256.toString(CryptoJS.enc.Base64);
         return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
