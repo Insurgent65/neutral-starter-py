@@ -7,29 +7,40 @@
                     "ref:locale:en": "English",
                     "ref:locale:es": "Español",
                     "ref:locale:de": "Deutsch",
-                    "ref:locale:fr": "Français",
-                    "Language": "Language"
+                    "ref:locale:fr": "Français"
                 },
                 "es": {
                     "ref:locale:en": "English",
                     "ref:locale:es": "Español",
                     "ref:locale:de": "Deutsch",
                     "ref:locale:fr": "Français",
-                    "Language": "Idioma"
+                    "Language": "Idioma",
+                    "Open": "Abrir",
+                    "Close": "Cerrar",
+                    "Menu": "Menú",
+                    "Back": "Volver"
                 },
                 "fr": {
                     "ref:locale:en": "English",
                     "ref:locale:es": "Español",
                     "ref:locale:de": "Deutsch",
                     "ref:locale:fr": "Français",
-                    "Language": "Langue"
+                    "Language": "Langue",
+                    "Open": "Ouvrir",
+                    "Close": "Fermer",
+                    "Menu": "Menu",
+                    "Back": "Retour"
                 },
                 "de": {
                     "ref:locale:en": "English",
                     "ref:locale:es": "Español",
                     "ref:locale:de": "Deutsch",
                     "ref:locale:fr": "Français",
-                    "Language": "Sprache"
+                    "Language": "Sprache",
+                    "Open": "Öffnen",
+                    "Close": "Schließen",
+                    "Menu": "Menü",
+                    "Back": "Zurück"
                 }
             }
         },
