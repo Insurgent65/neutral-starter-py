@@ -1,6 +1,4 @@
-# Copyright (C) 2025 https://github.com/FranBarInstance/neutral-pwa-py (See LICENCE)
-
-import json
+"""Dispatcher for sign-related forms (sign-in, sign-up, sign-out, etc.)."""
 
 from ftoken_0yt2sa import ftoken_check
 
@@ -77,9 +75,6 @@ class DispatcherFormSign(DispatcherForm):
 
         user_result = self.user.get_user(email)
 
-        print(user_result)
-        print(json.dumps(user_result, indent=2))
-
         if (
             not user_result
             or not user_result.get("success")
@@ -87,8 +82,8 @@ class DispatcherFormSign(DispatcherForm):
         ):
             return False
 
+
         reminder_data = self.user.user_reminder(user_result.get("user_data"))
-        print(json.dumps(reminder_data, indent=2))
         if (
             not reminder_data
             or not reminder_data.get("success")
@@ -132,7 +127,7 @@ class DispatcherFormSignIn(DispatcherFormSign):
 
         if unvalidated:
             self.schema_data["user_disabled_unvalidated"] = Config.DISABLED[UNVALIDATED]
-            return True
+            return False
 
         return self.create_session(user_data)
 
@@ -181,7 +176,6 @@ class DispatcherFormSignUp(DispatcherFormSign):
         user_result = self.create_user()
 
         if user_result["success"] != "true":
-            print("User creation failed:", user_result)
             # If the user already exists, send reminder.
             # Avoid disclosing whether the user exists or not.
             if user_result["error"] == USER_EXISTS:
@@ -244,7 +238,7 @@ class DispatcherFormSignUp(DispatcherFormSign):
 
 # Out
 class DispatcherFormSignOut(DispatcherFormSign):
-    """Handles password reminder form processing."""
+    """Handles user sign-out and session termination."""
 
     def logout(self) -> bool:
         """logout"""
@@ -282,7 +276,7 @@ class DispatcherFormSignReminder(DispatcherFormSign):
 
 # PIN
 class DispatcherFormSignPin(DispatcherFormSign):
-    """Handles password reminder form processing."""
+    """Handles PIN-based authentication or verification."""
 
     def form_post(self) -> bool:
         """Send a reminder email to the user."""
