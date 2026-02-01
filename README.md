@@ -110,6 +110,10 @@ CSP_ALLOWED_CONNECT=https://cdnjs.cloudflare.com,https://picsum.photos,https://f
 
 If you add new external resources (JS, CSS, fonts), remember to update these variables to avoid console errors and broken layouts.
 
+> [!TIP]
+> **Flexibility vs. Security**: If you prefer to allow all external sources for a specific resource type (common in development or less critical production sites), you can use the wildcard `*`.
+> For example: `CSP_ALLOWED_STYLE=*` will allow CSS from any domain. While this is less secure, it provides maximum compatibility and ease of use.
+
 ## Deployment
 
 For production, use a WSGI server like Gunicorn pointing to `src/wsgi.py`:
