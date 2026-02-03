@@ -7,10 +7,81 @@ This project is designed to be extensible via a "plug-and-play" component archit
 ## Features
 
 *   **Solid Backend**: Built on **Flask**, leveraging its ecosystem and simplicity.
-*   **Modular Architecture**: Everything is a component. Logic, routes, templates, and configurations are encapsulated in independent modules within `src/component`.
+*   **Modular Component Architecture**: Everything is a component. Logic, routes, templates, and configurations are encapsulated in independent modules within `src/component`.
 *   **PWA Ready**: Configuration ready for Service Workers, manifests, and mobile optimization.
 *   **Neutral Templating (NTPL)**: Powerful templating system allowing inheritance, mixins, and dynamic rendering.
 *   **Override System**: Customize base components without touching their original code thanks to the cascading loading system.
+*   **Internationalization Support (i18n)**: Multi-language support configurable per component.
+*   **Security Headers & CSP**: X-Frame-Options, X-Content-Type-Options, and strict Content Security Policy.
+*   **CSRF Protection**: Form token protection against Cross-Site Request Forgery attacks.
+*   **Rate Limiting**: Built-in protection against abuse and brute force attacks.
+*   **Responsive Design**: Adaptable to different devices and screen sizes.
+*   **Database Integration**: Support for database connections and SQL queries.
+*   **Customizable Themes**: Theme system with multiple theme support.
+*   **Session Management**: Secure session handling and management.
+*   **Form Validation**: Input validation rules defined in schemas.
+*   **File Upload Handling**: Support for file uploads with security controls.
+*   **Error Handling & Logging**: Comprehensive error handling and event logging system.
+*   **API Endpoints**: RESTful API support for component interactions.
+*   **Authentication & Authorization**: Built-in authentication and authorization mechanisms.
+*   **Configuration Management**: Layered configuration system (global, per-component, and local overrides).
+*   **Static File Serving**: Organized static file serving by component.
+*   **Template Rendering**: Dynamic template rendering with caching support.
+*   **URL Routing**: Flexible URL routing system with component-specific routes.
+*   **Middleware Support**: Request handling, authentication, and authorization middleware.
+*   **Testing Framework**: Structure prepared for unit and integration testing.
+*   **Documentation Generation**: Automated documentation generation capabilities.
+
+## Overview
+
+Neutral TS Starter Py is a modular web application built on Flask following a component-based architectural pattern. The application enables the creation of customizable web interfaces with support for multiple languages, PWA capabilities, and robust security features.
+
+The project is organized around a modular component system where each component encapsulates its own logic, routes, templates, and configuration, allowing for easy extension and customization.
+
+## Application Architecture
+
+The application follows a layered architecture pattern with clear separation of concerns:
+
+### 1. Presentation Layer
+- **Templates**: Uses the NeutralTemplate templating engine
+- **Styles**: Customizable CSS per component
+- **Interactivity**: Modular JavaScript per component
+- **Static Resources**: CSS, JS, images organized by component
+
+### 2. Application Logic Layer
+- **Routes**: Defined in component route modules
+- **Controllers**: Component-specific logic
+- **Middleware**: Request handling, authentication, authorization
+
+### 3. Data Layer
+- **Models**: Defined in `src/model/`
+- **SQL Queries**: Stored in JSON files
+- **Database Connection**: Configured in `src/app/`
+
+### 4. Service Layer
+- **Utilities**: Helper functions in `src/utils/`
+- **Configuration**: Global and component-specific parameters
+- **Internationalization**: Language management in component locales
+
+### Request Flow
+
+```
+HTTP Client
+    ↓
+Security Middleware
+    ↓
+Main Router
+    ↓
+[Select Component]
+    ↓
+Component Logic
+    ↓
+Model/Data
+    ↓
+Rendered Template
+    ↓
+HTTP Response
+```
 
 ## Prerequisites
 
@@ -80,9 +151,35 @@ The strength of this starter lies in `src/component`. Each folder there is a sel
 2.  **Order**: They load alphabetically. `cmp_5005` will override `cmp_5000` if there are conflicts.
 3.  **Content**: A component can have:
     *   `manifest.json`: Metadata and base path.
+    *   `schema.json`: Configuration and customization settings.
     *   `route/`: Python logic (Flask Blueprints).
     *   `neutral/`: HTML templates and snippets.
     *   `static/`: Specific assets (JS/CSS).
+    *   `__init__.py`: Component initialization.
+    *   `config.py`: Component-specific configuration.
+
+### Component Structure
+
+Each component follows this structure:
+
+```
+cmp_component_name/
+├── manifest.json      # Component metadata
+├── schema.json        # Configuration and customization
+├── route/             # Component-specific routes
+│   ├── __init__.py
+│   └── routes.py
+├── neutral/           # Component templates
+│   ├── component-init.ntpl
+│   └── route/
+│       └── root/
+│           └── content-snippets.ntpl
+├── static/            # Component static resources
+│   ├── component.css
+│   └── component.js
+├── __init__.py        # Component initialization
+└── config.py          # Component-specific configuration
+```
 
 For a detailed example, see the [Hello Component README](src/component/cmp_7000_hellocomp/README.md). For complete technical documentation on the component architecture, refer to [docs/component.md](docs/component.md).
 
@@ -118,6 +215,17 @@ If you add new external resources (JS, CSS, fonts), remember to update these var
 > [!TIP]
 > **Flexibility vs. Security**: If you prefer to allow all external sources for a specific resource type (common in development or less critical production sites), you can use the wildcard `*`.
 > For example: `CSP_ALLOWED_STYLE=*` will allow CSS from any domain. While this is less secure, it provides maximum compatibility and ease of use.
+
+## Internationalization
+
+The application provides comprehensive internationalization (i18n) support:
+
+- **Multi-language Support**: Configurable per component
+- **Translation Files**: JSON format in component `neutral/route/locale-*.json` files
+- **Automatic Detection**: Based on browser headers or user preferences
+- **Language Switching**: Built-in language selection mechanism
+
+Components can define their own translations in `neutral/route/locale-{lang}.json` files, where `{lang}` is the language code (e.g., `en`, `es`, `fr`, `de`).
 
 ## Deployment
 
