@@ -106,6 +106,11 @@ CSP_ALLOWED_STYLE=https://cdnjs.cloudflare.com,https://fonts.googleapis.com
 CSP_ALLOWED_IMG=https://picsum.photos,https://fastly.picsum.photos
 CSP_ALLOWED_FONT=https://cdnjs.cloudflare.com,https://fonts.gstatic.com
 CSP_ALLOWED_CONNECT=https://cdnjs.cloudflare.com,https://picsum.photos,https://fastly.picsum.photos
+
+# Security Content-Security-Policy (CSP) unsafe directives
+CSP_ALLOWED_SCRIPT_UNSAFE_INLINE=false
+CSP_ALLOWED_SCRIPT_UNSAFE_EVAL=false
+CSP_ALLOWED_STYLE_UNSAFE_INLINE=false
 ```
 
 If you add new external resources (JS, CSS, fonts), remember to update these variables to avoid console errors and broken layouts.
