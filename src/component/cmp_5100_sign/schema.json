@@ -112,13 +112,15 @@
         }
     },
     "data": {
-        "site": {
-            "sign_links": {
-                "in": "[:;data->sign_0yt2sa->manifest->route:]/in",
-                "up": "[:;data->sign_0yt2sa->manifest->route:]/up",
-                "reminder": "[:;data->sign_0yt2sa->manifest->route:]/reminder",
-                "out": "[:;data->sign_0yt2sa->manifest->route:]/out",
-                "pin": "[:;data->sign_0yt2sa->manifest->route:]/pin"
+        "current": {
+            "site": {
+                "sign_links": {
+                    "in": "[:;data->sign_0yt2sa->manifest->route:]/in",
+                    "up": "[:;data->sign_0yt2sa->manifest->route:]/up",
+                    "reminder": "[:;data->sign_0yt2sa->manifest->route:]/reminder",
+                    "out": "[:;data->sign_0yt2sa->manifest->route:]/out",
+                    "pin": "[:;data->sign_0yt2sa->manifest->route:]/pin"
+                }
             }
         },
         "core": {

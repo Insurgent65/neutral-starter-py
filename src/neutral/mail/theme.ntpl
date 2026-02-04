@@ -26,13 +26,13 @@
     </xml>
     <![endif]-->
     <!--[if mso]>
-        <style nonce="{:;CSP_NONCE:}">
+        <style>
             * {
                 font-family: sans-serif !important;
             }
         </style>
     <![endif]-->
-    <style nonce="{:;CSP_NONCE:}">
+    <style>
         :root {
           color-scheme: light;
           supported-color-schemes: light;
@@ -120,7 +120,7 @@
             font-family: sans-serif !important;
         }
     </style>
-    <style nonce="{:;CSP_NONCE:}">
+    <style>
 	    .button-td,
 	    .button-a {
 	        transition: all 100ms ease-in;

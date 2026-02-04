@@ -49,7 +49,7 @@ class Mail():
         """Initialize the Mail class."""
         self.schema = schema
         self.template_layout = Config.TEMPLATE_MAIL + '/index.ntpl'
-        self.site = self.schema['data']['site']
+        self.site = self.schema['data']['current']['site']
         self.auth_link = self.site['url'] + self.site['sign_links']['pin']
         self.login_link = self.site['url'] + self.site['sign_links']['in']
         self.reminder_link = self.site['url'] + self.site['sign_links']['reminder']
