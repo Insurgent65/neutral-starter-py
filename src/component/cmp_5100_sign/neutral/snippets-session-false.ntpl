@@ -20,7 +20,7 @@
                     {:snip; util:modal-back-button :}
                 </div>
                 <div class="modal-body px-2 mx-md-3 my-md-2">
-                    {:fetch; |/sign/in/form/{:;LTOKEN:}|visible| >>
+                    {:fetch; |{:;sign_0yt2sa->manifest->route:}/in/form/{:;LTOKEN:}|visible| >>
                         <div class="text-center p-5">{:snip; spin-2x :}</div>
                     :}
                 </div>
@@ -42,7 +42,7 @@
                     {:snip; util:modal-back-button :}
                 </div>
                 <div class="modal-body px-2 mx-md-3 my-md-2">
-                    {:fetch; |/sign/up/form/{:;LTOKEN:}|visible| >>
+                    {:fetch; |{:;sign_0yt2sa->manifest->route:}/up/form/{:;LTOKEN:}|visible| >>
                         <div class="text-center p-5">{:snip; spin-2x :}</div>
                     :}
                 </div>
@@ -64,7 +64,7 @@
                     {:snip; util:modal-back-button :}
                 </div>
                 <div class="modal-body px-2 mx-md-3 my-md-2">
-                    {:fetch; |/sign/reminder/form/{:;LTOKEN:}|visible| >>
+                    {:fetch; |{:;sign_0yt2sa->manifest->route:}/reminder/form/{:;LTOKEN:}|visible| >>
                         <div class="text-center p-5">{:snip; spin-2x :}</div>
                     :}
                 </div>

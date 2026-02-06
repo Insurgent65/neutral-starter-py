@@ -91,7 +91,7 @@
     Form
 *:}
 {:snip; forms-sign_up_form >>
-    {:fetch; |/sign/up/form/{:;LTOKEN:}|form|form-wrapper-register|{:;local::current->forms->class:}|sign_up_form| >>
+    {:fetch; |{:;sign_0yt2sa->manifest->route:}/up/form/{:;LTOKEN:}|form|form-wrapper-register|{:;local::current->forms->class:}|sign_up_form| >>
         <div class="input-group">
             <span class="input-group-text {:;local::x-icon-user-alias:} {:snip; is-invalid:alias :}"></span>
             <div class="form-floating">
@@ -116,7 +116,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help alias :}"
-                data-url="/sign/help/sign_up_form-alias"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_up_form-alias"
                 data-width="450"
                 data-class="fade"
             ></span>
@@ -150,7 +150,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help email :}"
-                data-url="/sign/help/sign_up_form-email"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_up_form-email"
                 data-width="450"
                 data-class="fade"
             ></span>
@@ -184,7 +184,7 @@
                         href="#help-item"
                         data-template="#templateHelp"
                         data-title="{:trans; Help password :}"
-                        data-url="/sign/help/sign_up_form-password"
+                        data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_up_form-password"
                         data-width="450"
                         data-class="fade"
                     ></span>
@@ -217,7 +217,7 @@
                         href="#help-item"
                         data-template="#templateHelp"
                         data-title="{:trans; Help password :}"
-                        data-url="/sign/help/sign_up_form-password"
+                        data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_up_form-password"
                         data-width="450"
                         data-class="fade"
                     ></span>
@@ -248,7 +248,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help date of birth :}"
-                data-url="/sign/help/sign_up_form-birthdate"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_up_form-birthdate"
                 data-width="450"
                 data-class="fade"
             ></span>
@@ -280,7 +280,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help not a robot :}"
-                data-url="/sign/help/notrobot"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/notrobot"
                 data-width="450"
                 data-class="fade"
             ></span>
@@ -308,7 +308,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help terms :}"
-                data-url="/sign/help/field-agree"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/field-agree"
                 data-width="450"
                 data-class="fade"
                 title="{:trans; See terms the terms of use :}"

@@ -9,7 +9,7 @@
                 <div class="card border-light mb-3 mt-md-4">
                     <div class="card-body px-4 pb-4 pt-3">
                         {:bool; HAS_SESSION >>
-                            {:fetch; |/sign/out/form/{:;LTOKEN:}|click| >>
+                            {:fetch; |{:;sign_0yt2sa->manifest->route:}/out/form/{:;LTOKEN:}|click| >>
                                 <button type="button" class="btn btn-primary w-100 {:;local::x-icon-sign-out:}"> {:trans; Confirm logout :}</button>
                             :}
                         :}{:else;

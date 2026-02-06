@@ -54,7 +54,7 @@
 :}
 
 {:snip; sign_reminder_form-form >>
-    {:fetch; |/sign/reminder/form/{:;LTOKEN:}|form|form-wrapper-reminder|{:;local::current->forms->class:}|reminder-form| >>
+    {:fetch; |{:;sign_0yt2sa->manifest->route:}/reminder/form/{:;LTOKEN:}|form|form-wrapper-reminder|{:;local::current->forms->class:}|reminder-form| >>
         <div class="input-group">
             <span class="input-group-text {:;local::x-icon-sign-reminder:} {:snip; is-invalid:email :}"></span>
             <div class="form-floating">
@@ -81,7 +81,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help email :}"
-                data-url="/sign/help/reminder-email"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/reminder-email"
                 data-width="450"
                 data-class="fade"
             ></span>
@@ -113,7 +113,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help not a robot :}"
-                data-url="/sign/help/notrobot"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/notrobot"
                 data-width="450"
                 data-class="fade"
             ></span>

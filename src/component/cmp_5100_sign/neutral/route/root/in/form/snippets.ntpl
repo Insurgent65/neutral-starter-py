@@ -77,7 +77,7 @@
             href="#help-item"
             data-template="#templateHelp"
             data-title="{:trans; Help email :}"
-            data-url="/sign/help/sign_in_form-email"
+            data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_in_form-email"
             data-width="450"
             data-class="fade"
         ></span>
@@ -109,7 +109,7 @@
             href="#help-item"
             data-template="#templateHelp"
             data-title="{:trans; Help password :}"
-            data-url="/sign/help/sign_in_form-password"
+            data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_in_form-password"
             data-width="450"
             data-class="fade"
         ></span>
@@ -137,7 +137,7 @@
             href="#help-item"
             data-template="#templateHelp"
             data-title="{:trans; Help remember :}"
-            data-url="/sign/help/sign_in_form-remember"
+            data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_in_form-remember"
             data-width="450"
             data-class="fade"
         ></span>
@@ -169,7 +169,7 @@
             href="#help-item"
             data-template="#templateHelp"
             data-title="{:trans; Help PIN :}"
-            data-url="/sign/help/sign_in_form-pin"
+            data-url="{:;sign_0yt2sa->manifest->route:}/help/sign_in_form-pin"
             data-width="450"
             data-class="fade"
         ></span>
@@ -201,7 +201,7 @@
 :}
 
 {:snip; sign_in_form-form >>
-    {:fetch; |/sign/in/form/{:;LTOKEN:}|form|form-wrapper-login|{:;local::current->forms->class:}|sign_in_form| >>
+    {:fetch; |{:;sign_0yt2sa->manifest->route:}/in/form/{:;LTOKEN:}|form|form-wrapper-login|{:;local::current->forms->class:}|sign_in_form| >>
         {:snip; sign_in_form-error :}
 
         {:bool; user_disabled_unconfirmed >>
@@ -237,7 +237,7 @@
                 href="#help-item"
                 data-template="#templateHelp"
                 data-title="{:trans; Help not a robot :}"
-                data-url="/sign/help/notrobot"
+                data-url="{:;sign_0yt2sa->manifest->route:}/help/notrobot"
                 data-width="450"
                 data-class="fade"
             ></span>
