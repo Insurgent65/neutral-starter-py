@@ -224,10 +224,12 @@ User-provided data should be placed in `CONTEXT`:
 
 All `CONTEXT` variables are automatically HTML-escaped.
 
-### Variable Security
+### Security
 - Variables are **not evaluated** (template injection safe)
 - Complete variable evaluation requires `{:allow; ... :}`
 - Partial evaluation allowed: `{:; array->{:;key:} :}`
+- Templates cannot access data not in schema.
+- `CONTEXT` vars auto-escaped. `filter_all: true` escapes everything.
 
 ### File Security
 ```
@@ -315,6 +317,11 @@ Translation schema:
     Content if not empty: {:;__eval__:}
 :}
 ```
+
+## Scope & Inheritance
+- Definitions are block-scoped, inherited by children, recovered on exit.
+- `include` has block scope.
+- `+` modifier promotes definitions to current/parent scope.
 
 ### Scope Modifier (`+`)
 By default, definitions have block scope. `+` extends to current level:
@@ -428,18 +435,6 @@ Events: `auto`, `none`, `click`, `visible`, `form`
 5. **Validate variables** with `declare`/`allow` before evaluation
 6. **Remove debug** BIFs before production
 7. **Both application and templates** should implement security
-
-## Scope & Inheritance
-- Definitions are block-scoped, inherited by children, recovered on exit.
-- `include` has block scope.
-- `+` modifier promotes definitions to current/parent scope.
-
-## Security
-- Templates cannot access data not in schema.
-- Variable values NEVER evaluated as BIFs (injection-safe).
-- Full dynamic var/file names → error (use `allow`).
-- `CONTEXT` vars auto-escaped. `filter_all: true` escapes everything.
-- Rules: Never trust CONTEXT. Filter at BOTH app and template layers.
 
 ## Truth Table
 | Variable | Value | filled | defined | bool | array |
