@@ -66,14 +66,14 @@ Modifiers can be combined: `{:^!defined; varname >> ... :}`
 
 ## Variables
 
-### Variable Access
+### Variable `schema.data` (Immutable)
 ```
 {:;varname:}           # Simple variable
 {:;array->key:}        # Array/object access
 {:;array->{:;key:}:}   # Dynamic evaluation
 ```
 
-### Local Variable Access
+### Local Variable `schema.inherit.data` (Mutable)
 ```
 {:;local::varname:}           # Simple variable
 {:;local::array->key:}        # Array/object access
