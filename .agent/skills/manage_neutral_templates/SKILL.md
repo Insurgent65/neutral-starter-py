@@ -63,7 +63,7 @@ Neutral TS uses **BIFs (Built-in Functions)** wrapped in `{::}`.
 
 ### Advanced
 - `{:cache; /300/ >> content :}`: Cache block for 300 seconds.
-- `{:coalesce; {:;v1:} {:;v2:} >> default :}`: Take first non-empty.
+- `{:coalesce; {:;v1:} {:;v2:} :}`: Take first non-empty.
 - `{:eval; code >> use {:;__eval__:} :}`: Evaluate code and use result.
 
 ## Security Standards (CRITICAL)
