@@ -457,3 +457,53 @@ Events: `auto`, `none`, `click`, `visible`, `form`
 | undef | — | ❌ | ❌ | ❌ | ❌ |
 | [] | empty arr | ❌ | ✅ | ❌ | ✅ |
 | {...} | object | ✅ | ✅ | ✅ | ✅ |
+
+## Page Content Strategy
+
+The application uses a snippet-based architectural pattern to render dynamic route-specific content within a consistent global layout.
+
+### Layout Orchestration (`index.ntpl`)
+
+The entry point for rendering any page is typically `src/component/cmp_0200_template/neutral/layout/index.ntpl`. Its main functions are:
+
+1.  **Global Includes**: It loads utility snippets, theme structures, and navigation components.
+2.  **Route Inclusion**: It dynamically includes the `content-snippets.ntpl` file corresponding to the current route:
+    ```ntpl
+    {:include; {:;CURRENT_NEUTRAL_ROUTE:}/{:;CURRENT_COMP_ROUTE:}/content-snippets.ntpl :}
+    ```
+3.  **Template Execution**: Depending on the request type (AJAX vs. standard), it loads the final rendering structure (`template.ntpl` or `template-ajax.ntpl`).
+
+### The Base Template (`template.ntpl`)
+
+The `template.ntpl` file defines the semantic HTML5 skeleton. Instead of direct content, it uses **placeholders** (snippets) that are filled by the route-specific files:
+
+- `{:snip; current:template:page-h1 :}`: Renders the page title.
+- `{:snip; current:template:body-main-content :}`: Renders the primary page body.
+- `{:snip; current:template:body-lateral-bar :}`: Renders an optional sidebar.
+
+> [!IMPORTANT]
+> All default implementations for these snippets are located in `src/component/cmp_0200_template/neutral/layout/template-snippets.ntpl`. **Modifying this file directly is not recommended.** Instead, you should overwrite the desired snippet in your route's `content-snippets.ntpl` file to customize behavior for that specific route.
+
+### Route-Specific Dynamic (`content-snippets.ntpl`)
+
+Each route (e.g., `src/component/cmp_xxxx/neutral/route/root/test1/`) provides its own `content-snippets.ntpl`. This file is responsible for:
+
+1.  **Data Persistence**: Loading the local `data.json` to populate the `local::current` namespace.
+    ```ntpl
+    {:data; {:flg; require :} >> #/data.json :}
+    ```
+    *Example `data.json` for the global H1:*
+    ```json
+    { "data": { "current": { "route": { "h1": "My Visible Title" } } } }
+    ```
+2.  **Component Overrides**: Modifying or disabling global snippets (e.g., hiding the sidebar).
+    ```ntpl
+    {:snip; current:template:body-lateral-bar >> :}
+    ```
+3.  **Core Content**: Defining the final content for the main placeholder.
+    ```ntpl
+    {:snip; current:template:body-main-content >>
+        <p>Dynamic Content Here</p>
+    :}
+    ```
+4.  **Inclusion Force**: Always end with `{:^;:}` to ensure the include BIF detects success content.
