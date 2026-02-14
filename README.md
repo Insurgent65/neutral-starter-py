@@ -1,6 +1,6 @@
 # Neutral TS Starter Py
 
-**Neutral TS Starter Py** is a modular scaffold for building Progressive Web Applications (PWA) using **Python (Flask)** on the backend and **[Neutral TS](https://github.com/FranBarInstance/neutralts)** as a universal templating engine.
+**Neutral TS Starter Py** is a modular, opinionated starter kit for building Progressive Web Applications (PWA) using **Python (Flask)** on the backend and **[Neutral TS](https://github.com/FranBarInstance/neutralts)** as a universal templating engine.
 
 This project is designed to be extensible via a "plug-and-play" component architecture, allowing scalability from quick prototypes to complex applications while maintaining a clean and decoupled structure.
 
