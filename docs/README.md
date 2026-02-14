@@ -21,3 +21,4 @@ The following documents provide detailed information about the system:
 - **[component.md](component.md)**: Deep dive into the **Component System**. Covers naming conventions, file structure, lifecycle, and priority/overriding rules.
 - **[model.md](model.md)**: Documentation for the **Data Model layer**. Explains how to define and use SQL queries via JSON files and the central Model executor.
 - **[templates-neutrats.md](templates-neutrats.md)**: Comprehensive syntax reference for the **Neutral Template Engine (NTPL)**, including variables, control flow, snippets, and safety features.
+- **[dispatcher.md](dispatcher.md)**: Documentation for the **Dispatcher** system.
