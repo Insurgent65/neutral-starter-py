@@ -31,6 +31,7 @@ To configure the application:
 | `SECRET_KEY` | Secret key for sessions and tokens | - |
 | `SITE_DOMAIN` | Site domain | `localhost` |
 | `SITE_URL` | Full site URL | `http://localhost` |
+| `ALLOWED_HOSTS` | Allowed request hosts (comma separated, wildcard supported) | `localhost` |
 | `NEUTRAL_IPC` | Enable IPC mode | `False` |
 | `NEUTRAL_CACHE_DISABLE` | Disable cache | `False` |
 | `TEMPLATE_HTML_MINIFY` | Minify HTML | `False` |

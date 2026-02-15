@@ -1,6 +1,7 @@
 """Fill the schema with default values"""
 
 import copy
+import fnmatch
 from http.cookies import SimpleCookie
 
 import woothee
@@ -87,13 +88,45 @@ class Schema:
             for key, morsel in cookie.items():
                 self.data['CONTEXT']['COOKIES'][key] = morsel.value
 
-        host = self.req.headers.get('Host')
-        if host:
-            self.data['current']['site']['host'] = host
-            self.data['current']['site']['url'] = self.req.scheme + "://" + host
+        raw_host = (self.req.host or self.req.headers.get('Host') or '').strip().lower()
+        normalized_host = self._normalize_host(raw_host)
+
+        if normalized_host and self._is_allowed_host(normalized_host):
+            self.data['current']['site']['host'] = raw_host
+            self.data['current']['site']['url'] = self.req.scheme + "://" + raw_host
         else:
             self.data['current']['site']['host'] = Config.SITE_DOMAIN
             self.data['current']['site']['url'] = Config.SITE_URL
+
+    @staticmethod
+    def _normalize_host(host):
+        """Normalize host value for allow-list checks (strip port and trailing dot)."""
+        if not host:
+            return ""
+
+        value = host.strip().lower().rstrip('.')
+
+        # IPv6 in URL host format: [::1]:5000
+        if value.startswith('['):
+            end = value.find(']')
+            if end != -1:
+                return value[1:end]
+
+        if ':' in value:
+            return value.rsplit(':', 1)[0]
+
+        return value
+
+    @staticmethod
+    def _is_allowed_host(host):
+        """Check host against ALLOWED_HOSTS list supporting wildcard patterns."""
+        for pattern in Config.ALLOWED_HOSTS:
+            normalized_pattern = (pattern or '').strip().lower().rstrip('.')
+            if not normalized_pattern:
+                continue
+            if normalized_pattern == "*" or fnmatch.fnmatch(host, normalized_pattern):
+                return True
+        return False
 
     def _negotiate_language(self) -> None:
         languages = self.data['current']['site']['languages']

@@ -21,6 +21,10 @@ class Config: # pylint: disable=too-few-public-methods
     SECRET_KEY = config.get('SECRET_KEY')
     SITE_DOMAIN = config.get('SITE_DOMAIN')
     SITE_URL = config.get('SITE_URL')
+    # Comma separated list with wildcard support. Example:
+    # ALLOWED_HOSTS=localhost,*.example.com,my-other-domain.org
+    _allowed_hosts_raw = config.get('ALLOWED_HOSTS', SITE_DOMAIN or '')
+    ALLOWED_HOSTS = [item.strip().lower() for item in _allowed_hosts_raw.split(',') if item.strip()]
     TRUSTED_PROXY_CIDRS = [item.strip() for item in config.get('TRUSTED_PROXY_CIDRS', '').split(',') if item.strip()]
     NEUTRAL_IPC=config.get('NEUTRAL_IPC', 'False').lower() == 'true'
     NEUTRAL_CACHE_DISABLE=config.get('NEUTRAL_CACHE_DISABLE', 'False').lower() == 'true'
