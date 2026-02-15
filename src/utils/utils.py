@@ -1,13 +1,48 @@
 # Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE)
 
 import json
+import ipaddress
 
-from flask import request
+from flask import current_app, request
 
 
 def get_ip():
-    """Get the IP address of the client, cloudflare ip or remote addr."""
-    return request.headers.get("CF-Connecting-IP", request.remote_addr)
+    """Get client IP safely, trusting CF-Connecting-IP only from trusted proxies."""
+    remote_addr = request.remote_addr or ""
+    cf_connecting_ip = (request.headers.get("CF-Connecting-IP") or "").strip()
+
+    if cf_connecting_ip and _is_trusted_proxy(remote_addr):
+        parsed_ip = _parse_ip(cf_connecting_ip)
+        if parsed_ip is not None:
+            return str(parsed_ip)
+
+    return remote_addr
+
+
+def _parse_ip(value):
+    try:
+        return ipaddress.ip_address(value)
+    except ValueError:
+        return None
+
+
+def _is_trusted_proxy(remote_addr):
+    remote_ip = _parse_ip(remote_addr)
+    if remote_ip is None:
+        return False
+
+    trusted_proxies = current_app.config.get("TRUSTED_PROXY_CIDRS", [])
+    for cidr in trusted_proxies:
+        try:
+            network = ipaddress.ip_network(cidr, strict=False)
+            if remote_ip in network:
+                return True
+        except ValueError:
+            trusted_ip = _parse_ip(cidr)
+            if trusted_ip is not None and remote_ip == trusted_ip:
+                return True
+
+    return False
 
 
 def format_ua(ua):

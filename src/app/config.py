@@ -21,6 +21,7 @@ class Config: # pylint: disable=too-few-public-methods
     SECRET_KEY = config.get('SECRET_KEY')
     SITE_DOMAIN = config.get('SITE_DOMAIN')
     SITE_URL = config.get('SITE_URL')
+    TRUSTED_PROXY_CIDRS = [item.strip() for item in config.get('TRUSTED_PROXY_CIDRS', '').split(',') if item.strip()]
     NEUTRAL_IPC=config.get('NEUTRAL_IPC', 'False').lower() == 'true'
     NEUTRAL_CACHE_DISABLE=config.get('NEUTRAL_CACHE_DISABLE', 'False').lower() == 'true'
     DEFAULT_SCHEMA = os.path.join(BASE_DIR, "app", "schema.json")
