@@ -48,6 +48,9 @@ def chat_api() -> Response:
             }), 400
 
     except Exception as exc:  # pylint: disable=broad-except
+        # TODO(security/api-errors): This component is disabled for now.
+        # Before re-enabling, do not expose str(exc) to clients.
+        # Return a generic message and log technical details server-side only.
         return jsonify({
             "success": False,
             "error": f"Internal server error: {str(exc)}"
