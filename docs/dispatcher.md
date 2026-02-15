@@ -122,6 +122,7 @@ During initialization, the dispatcher automatically populates several keys in `s
 | `CSP_NONCE` | A unique nonce string for Content Security Policy inline scripts/styles. |
 | `LTOKEN` | A freshly generated link token derived from the current UTOKEN. |
 | `COMPONENTS_MAP_BY_NAME` | Map of component names to their UUIDs. |
+| `COMPONENTS_MAP_BY_UUID` | Map of component UUIDs to their names. |
 
 ---
 
@@ -242,7 +243,34 @@ dispatch.schema_data["items"] = {"count": 42, "label": "widgets"}
 | `dispatch_result` | Convention: boolean result of business logic. |
 | `core` | Core configuration data (forms, validation rules, etc.). |
 | `COMPONENTS_MAP_BY_NAME` | Component name → UUID mapping. |
+| `COMPONENTS_MAP_BY_UUID` | Component UUID → name mapping. |
 | `<component_uuid>` | Component-specific manifest and schema data. |
+| `<component_name>` | Alias to the same component-specific manifest and schema data. |
+
+#### Accessing Component Data by UUID or Name
+
+Component metadata is available in `dispatch.schema_data` using both keys:
+
+- `dispatch.schema_data[<component_uuid>]`
+- `dispatch.schema_data[<component_name>]`
+
+Example:
+
+```python
+hello_manifest = dispatch.schema_data["hellocomp_0yt2sa"]["manifest"]
+hello_manifest_alias = dispatch.schema_data["cmp_7000_hellocomp"]["manifest"]
+```
+
+Both access paths point to the same component data object. Prefer the UUID key for backend logic because UUIDs are stable; component directory names may change over time.
+
+You can also use the component `path` from `schema_data` to resolve file locations in a portable way across installations:
+
+```python
+hello_path = dispatch.schema_data["hellocomp_0yt2sa"]["path"]
+hello_manifest_path = f'{hello_path}/manifest.json'
+```
+
+Using `dispatch.schema_data[<component_uuid>]["path"]` avoids coupling to hardcoded folder names when components are renamed or deployed in different base directories.
 
 ### `dispatch.schema_local_data` — Local Mutable Data
 
