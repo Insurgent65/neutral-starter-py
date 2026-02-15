@@ -127,6 +127,11 @@ def sign_out_form(route, ltoken) -> Response:
 @bp.route("/pin/<pin_token>", defaults={"route": "pin"}, methods=["GET"])
 def sign_pin_form_get(route, pin_token) -> Response:
     """Handle GET requests for PIN."""
+    # TODO(security/auth-flow): Implement full PIN verification flow.
+    # Expected behavior:
+    # 1) Resolve pin_token with DB query (user.get-pin-by-token) and render a PIN form.
+    # 2) On POST, validate submitted PIN against that token and mark email/user as confirmed.
+    # Current behavior is provisional and still reuses reminder/signup dispatchers.
     dispatch = DispatcherFormSignReminder(request, route, bp.neutral_route, pin_token)
     dispatch.schema_data["dispatch_result"] = dispatch.form_get()
     return dispatch.view.render()
