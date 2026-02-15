@@ -10,7 +10,7 @@ VENV_DIR = os.path.join(SRC_DIR, '..', '.venv')
 TMP_DIR = os.path.join(SRC_DIR, '..', 'tmp')
 APP_CONFIG_FILE = os.getenv('APP_CONFIG_FILE', os.path.join(SRC_DIR, '..', 'config', '.env'))
 
-NOW = int(time.time())
+STARTTIME = int(time.time())
 SECONDS_MINUTE = 60
 SECONDS_HOUR = 3600
 SECONDS_DAY = 86400

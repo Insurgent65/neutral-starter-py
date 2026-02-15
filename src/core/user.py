@@ -26,9 +26,9 @@ class User:
             "login": login,
             "password": self.hash_password(data['password']),
             "birthdate": self.hash_birthdate(data['birthdate']),
-            "lasttime": NOW,
-            "created": NOW,
-            "modified": NOW
+            "lasttime": STARTTIME,
+            "created": STARTTIME,
+            "modified": STARTTIME
         }
 
     def _build_user_profile_params(self, profile_id, user_id, data):
@@ -39,9 +39,9 @@ class User:
             "locale": data['locale'],
             "alias": data['alias'].strip(),
             "properties": data['properties'].strip() if 'properties' in data else "{}",
-            "lasttime": NOW,
-            "created": NOW,
-            "modified": NOW
+            "lasttime": STARTTIME,
+            "created": STARTTIME,
+            "modified": STARTTIME
         }
 
     def _build_user_email_params(self, user_id, data):
@@ -49,15 +49,15 @@ class User:
             "email": data['email'].strip(),
             "userId": user_id,
             "main": Config.MAIN_EMAIL['true'],
-            "created": NOW
+            "created": STARTTIME
         }
 
     def _build_user_disabled_params(self, user_id, reason):
         return {
             "userId": user_id,
             "reason": reason,
-            "created": NOW,
-            "modified": NOW
+            "created": STARTTIME,
+            "modified": STARTTIME
         }
 
     def _build_user_pin_params(self, target, user_id):
@@ -66,8 +66,8 @@ class User:
             "userId": user_id,
             "pin": random.randint(Config.PIN_MIN, Config.PIN_MAX),
             "token": sbase64url_token(Config.TOKEN_LENGTH),
-            "created": NOW,
-            "expires": NOW + Config.PIN_EXPIRES_SECONDS
+            "created": STARTTIME,
+            "expires": STARTTIME + Config.PIN_EXPIRES_SECONDS
         }
 
     def create(self, data) -> dict:
@@ -190,7 +190,7 @@ class User:
                 user_data['user_disabled'][Config.DISABLED_KEY[key]] = key
                 if pin and row['user_disabled.reason'] == unconfirmed:
                     target = str(user_data_list[0]['userId']) + '_' + str(unconfirmed)
-                    result_pin = self.model.exec('user', 'get-pin', {"target": target, "pin": pin, "now": NOW})
+                    result_pin = self.model.exec('user', 'get-pin', {"target": target, "pin": pin, "now": STARTTIME})
                     if result_pin and result_pin['rows'] and result_pin['rows'][0] and result_pin['rows'][0][0]:
                         self.model.exec('user', 'delete-disabled', {
                             "reason": unconfirmed, "userId": user_data_list[0]['userId']

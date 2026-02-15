@@ -6,7 +6,7 @@ import time
 import regex as re
 
 from app.config import Config
-from constants import NOW
+from constants import STARTTIME
 
 from .sbase64url import sbase64url_sha256
 
@@ -57,7 +57,7 @@ def utoken_update(utoken_str):
         return utoken_create()
 
     # New token if expires
-    if NOW > int(created) + Config.UTOKEN_IDLE_EXPIRES_SECONDS:
+    if STARTTIME > int(created) + Config.UTOKEN_IDLE_EXPIRES_SECONDS:
         return utoken_create()
 
     updated = int(time.time())
