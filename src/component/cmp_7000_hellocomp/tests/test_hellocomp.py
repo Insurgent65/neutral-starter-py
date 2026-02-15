@@ -13,8 +13,8 @@ The component is mounted at /hello-component and defines routes for:
 import os
 from flask import request
 
-# These imports work thanks to the sys.path manipulation in __init__.py
-from route.dispatcher_hellocomp import DispatcherHelloComp
+# This import works thanks to the sys.path manipulation in tests/__init__.py
+from dispatcher_hellocomp import DispatcherHelloComp  # pylint: disable=import-error
 from core.dispatcher import Dispatcher
 
 # Determine paths dynamically
