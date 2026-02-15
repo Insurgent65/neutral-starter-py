@@ -1,5 +1,5 @@
 ---
-name: create-component
+name: manage-component
 description: Create a new Neutral TS component following the standard directory structure and file templates.
 ---
 
