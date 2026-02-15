@@ -1,5 +1,7 @@
 """This module handles the routing for sign-in, sign-up, and related forms."""
 
+import hashlib
+
 from flask import Response, request
 
 from app.config import Config
@@ -13,6 +15,14 @@ from .dispatcher_form_sign import (
     DispatcherFormSignReminder,
     DispatcherFormSignUp,
 )
+
+
+def sign_in_email_limit_key() -> str:
+    """Rate-limit key based on normalized email for sign-in attempts."""
+    email = (request.form.get("email") or "").strip().lower()
+    if not email:
+        return "signin-email:missing"
+    return "signin-email:" + hashlib.sha256(email.encode("utf-8")).hexdigest()
 
 
 @bp.route("/in", defaults={"route": "in"}, methods=["GET"])
@@ -33,13 +43,15 @@ def sign_in_form_get(route, ltoken) -> Response:
 
 @bp.route("/in/form/<ltoken>", defaults={"route": "in/form"}, methods=["POST"])
 @limiter.limit(Config.SIGNIN_LIMITS, error_message="Please wait and try again later.")
+@limiter.limit(
+    Config.SIGNIN_EMAIL_LIMITS,
+    key_func=sign_in_email_limit_key,
+    error_message="Please wait and try again later.",
+)
 def sign_in_form_post(route, ltoken) -> Response:
     """Handle POST requests for user authentication."""
     dispatch = DispatcherFormSignIn(request, route, bp.neutral_route, ltoken, "sign_in_form", "email")
     dispatch.schema_data["dispatch_result"] = dispatch.form_post()
-
-    if dispatch.schema_data["dispatch_result"]:
-        limiter.reset()
 
     return dispatch.view.render()
 

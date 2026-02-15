@@ -48,6 +48,7 @@ class Config: # pylint: disable=too-few-public-methods
     DEFAULT_LIMITS = config.get('DEFAULT_LIMITS', "3600/hour")
     STATIC_LIMITS = config.get('STATIC_LIMITS', "7200/hour")
     SIGNIN_LIMITS = config.get('SIGNIN_LIMITS', "3 per 30 minutes")
+    SIGNIN_EMAIL_LIMITS = config.get('SIGNIN_EMAIL_LIMITS', "10 per 30 minutes")
     SIGNUP_LIMITS = config.get('SIGNUP_LIMITS', "5 per 30 minutes")
     SIGNREMINDER_LIMITS = config.get('SIGNREMINDER_LIMITS', "5 per 30 minutes")
     SIGNT_LIMITS = config.get('SIGNT_LIMITS', "5 per 30 minutes")
