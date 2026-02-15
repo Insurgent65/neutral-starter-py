@@ -12,6 +12,7 @@ from utils.utils import merge_dict
 
 from .config import Config
 from .components import Components
+from .debug_guard import is_debug_enabled, is_wsgi_debug_enabled
 from .extensions import cache, limiter
 
 
@@ -77,11 +78,16 @@ def add_security_headers(response): # pylint: disable=too-many-locals
     return response
 
 
-def create_app(config_class=Config, debug=False):
+def create_app(config_class=Config, debug=None):
     """Application factory function."""
     app = Flask(__name__)
     app.config.from_object(config_class)
-    app.debug = debug
+
+    if debug is None:
+        running_under_wsgi = os.getenv("RUNNING_UNDER_WSGI", "false").lower() in {"true", "1", "yes"}
+        debug = is_wsgi_debug_enabled() if running_under_wsgi else is_debug_enabled()
+
+    app.debug = bool(debug)
     app.url_map.strict_slashes = False
 
     app.handle_errors = False

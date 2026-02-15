@@ -36,15 +36,37 @@ cp .env.example .env
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DEBUG_FILE` | Path of the "debug switch" file. Debug mode is enabled only while this file exists and is fresh. | empty |
-| `DEBUG_EXPIRE` | Max age (seconds) since the last modification time of `DEBUG_FILE`. After that, debug is auto-disabled. | required by current code |
+| `DEBUG_EXPIRE` | Max age (seconds) since the last modification time of `DEBUG_FILE`. `0` (or invalid) means debug stays disabled. | `0` |
+| `WSGI_DEBUG_ALLOWED` | Second gate for WSGI entrypoints (`wsgi.py`, `wsgi_test.py`). Must be `true` in addition to other debug checks. | `false` |
 
-Development workflow example:
+Debug activation rules:
 
-```bash
-touch /tmp/enable-neutral-debug-83i346yfgfbvsf23
+1. `FLASK_DEBUG` must be enabled (`true`, `1`, or `yes`).
+2. `DEBUG_FILE` must point to an existing file.
+3. `DEBUG_EXPIRE` must be a number greater than `0`.
+4. The file modification time must be recent enough: `now - mtime <= DEBUG_EXPIRE`.
+5. For WSGI entrypoints (`wsgi.py`, `wsgi_test.py`), `WSGI_DEBUG_ALLOWED=true` is also required.
+
+If any check fails, debug is disabled.
+
+Example `.env` for local development:
+
+```env
+FLASK_DEBUG=true
+DEBUG_FILE=/tmp/enable-neutral-debug-<random-suffix>
+DEBUG_EXPIRE=120
+WSGI_DEBUG_ALLOWED=true
 ```
 
-Use that same path in `DEBUG_FILE`. The file can be empty; only its modification time is used.
+Development workflow example (refresh window):
+
+```bash
+touch /tmp/enable-neutral-debug-<random-suffix>
+```
+
+Use that same path in `DEBUG_FILE`.
+The `<random-suffix>` part should be random (do not use a fixed/public name), which reduces accidental discovery.
+The file can be empty; only its modification time is used.
 To keep debug active in development, run `touch` periodically before `DEBUG_EXPIRE` is reached.
 
 ### Security / Site

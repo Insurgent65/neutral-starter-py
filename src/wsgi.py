@@ -57,4 +57,5 @@ if src_dir not in sys.path:
 
 # Import the Flask application only after all paths have been configured
 from app import create_app  # pylint: disable=C0413
-application = create_app(debug=False)
+
+application = create_app()

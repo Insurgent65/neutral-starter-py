@@ -38,7 +38,8 @@ class Schema:
 
         # Debug
         if current_app.debug:
-            self.properties['config']['debug_expire'] = Config.DEBUG_EXPIRE
+            debug_expire = Config.DEBUG_EXPIRE if Config.DEBUG_EXPIRE > 0 else ""
+            self.properties['config']['debug_expire'] = debug_expire
             self.properties['config']['debug_file'] = Config.DEBUG_FILE
 
         # The neutral-ipc process has a different user, therefore different permissions

@@ -15,7 +15,11 @@ class Config: # pylint: disable=too-few-public-methods
 
     COMP_ROUTE_ROOT = "root"
 
-    DEBUG_EXPIRE = int(config.get('DEBUG_EXPIRE'))
+    _debug_expire_raw = (config.get('DEBUG_EXPIRE', '') or '').strip()
+    try:
+        DEBUG_EXPIRE = int(_debug_expire_raw) if _debug_expire_raw else 0
+    except ValueError:
+        DEBUG_EXPIRE = 0
     DEBUG_FILE = config.get('DEBUG_FILE')
 
     SECRET_KEY = config.get('SECRET_KEY')
