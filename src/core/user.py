@@ -8,7 +8,7 @@ import time
 # import json
 import bcrypt
 from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
-from utils.sbase64url import sbase64url_sha256, sbase64url_md5, sbase64url_token
+from utils.sbase64url import sbase64url_sha256, sbase64url_token
 from app.config import Config
 from .model import Model
 # import pprint
@@ -150,17 +150,10 @@ class User:
         return bcrypt.hashpw(password.strip().encode('utf-8'), bcrypt.gensalt())
 
     def hash_birthdate(self, birthdate: str) -> str:
-        """Obfuscate birthdate for casual privacy, not for cryptographic protection.
-
-        NOTE:
-        - This value is intentionally obfuscated to avoid showing the raw date at a glance.
-        - Birthdates have a very small input space; in a data breach scenario, any hash
-          algorithm (including stronger ones) can be brute-forced via dictionary/range attacks.
-        - Treat this as light obfuscation only, not as secure anonymization.
-        """
+        """Hash normalized birthdate timestamp using bcrypt."""
         dt = datetime.fromisoformat(birthdate).replace(tzinfo=timezone.utc)
         ts = dt.timestamp()
-        return sbase64url_md5(str(ts))
+        return bcrypt.hashpw(str(ts).encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def check_login(self, login, password, pin) -> dict | None:
         """Validates user credentials and returns user data if valid"""
@@ -186,7 +179,11 @@ class User:
         unconfirmed = Config.DISABLED[UNCONFIRMED]
         user_data = {
             'userId': user_data_list[0]['userId'],
-            'birthdate': user_data_list[0]['birthdate'],
+            'birthdate': (
+                user_data_list[0]['birthdate'].decode('utf-8')
+                if isinstance(user_data_list[0]['birthdate'], (bytes, bytearray))
+                else user_data_list[0]['birthdate']
+            ),
             'created': user_data_list[0]['created'],
             'lasttime': user_data_list[0]['lasttime'],
             'modified': user_data_list[0]['modified'],
