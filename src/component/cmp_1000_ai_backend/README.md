@@ -1,4 +1,4 @@
-# AI Models Library Backend (cmp_8000_ai_backend)
+# AI Models Library Backend (ai_backend_0yt2sa)
 
 This component provides a unified backend interface to interact with multiple AI model providers, including OpenAI, Anthropic (Claude), Google (Gemini), and Ollama (Local).
 

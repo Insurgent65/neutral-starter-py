@@ -199,5 +199,5 @@ Run tests with `pytest`. Each component should carry its own tests.
 
 ```bash
 # Test specific component
-pytest src/component/cmp_8000_dashboard/tests
+pytest src/component/cmp_7000_hellocomp/tests
 ```
