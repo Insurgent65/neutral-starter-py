@@ -24,3 +24,4 @@ The following documents provide detailed information about the system:
 - **[templates-neutrats.md](templates-neutrats.md)**: Comprehensive syntax reference for the **Neutral Template Engine (NTPL)**, including variables, control flow, snippets, and safety features.
 - **[dispatcher.md](dispatcher.md)**: Documentation for the **Dispatcher** system.
 - **[ajax-neutral-requests.md](ajax-neutral-requests.md)**: Integration notes for AJAX requests and `Requested-With-Ajax`, including behavior when using Neutral fetch vs custom JavaScript.
+- **[translation-component.md](translation-component.md)**: Translation workflow for components, including `{:trans; ... :}` best practices, locale file strategy, and the `translate-component` skill.
