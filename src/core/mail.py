@@ -5,6 +5,7 @@
 import json
 import math
 import smtplib
+import copy
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from subprocess import Popen, PIPE
@@ -67,7 +68,7 @@ class Mail():
             "user_alias": '',
             "expires": math.floor(int(Config.PIN_EXPIRES_SECONDS) / 60 / 60),
         }
-        self.default_schema = self.DEFAULT_SCHEMA
+        self.default_schema = copy.deepcopy(self.DEFAULT_SCHEMA)
         self.default_schema['inherit']['locale']['current'] = self.schema['inherit']['locale']['current']
 
     def send(self, template: str, user_data: dict) -> None:
