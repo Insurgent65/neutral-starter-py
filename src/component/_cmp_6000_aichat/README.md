@@ -1,4 +1,6 @@
-# cmp_6000_aichat
+**NOTE: This component is recommended only for local environments. Activate and use it in local mode only.**
+
+# aichat_0yt2sa
 
 AI chat component integrated with `ai_backend_0yt2sa`.
 
@@ -31,7 +33,7 @@ Configure limits in `manifest.json` under `"config"`:
 
 For local overrides without modifying component source files, create:
 
-- `src/component/cmp_6000_aichat/custom.json`
+- `src/component/_cmp_6000_aichat/custom.json`
 
 At load time, values under `custom.json -> manifest` override `manifest.json`.
 Use this to customize route metadata and runtime config (`default_profile`, limits, prompts, etc.).
