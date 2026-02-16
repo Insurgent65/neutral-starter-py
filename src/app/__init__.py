@@ -3,9 +3,10 @@
 import ipaddress
 import json
 import os
+import fnmatch
 from importlib import import_module
 
-from flask import Flask, request
+from flask import Flask, request, abort
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.routing import PathConverter
 
@@ -159,6 +160,40 @@ def create_app(config_class=Config, debug=None):
                 if view_func:
                     print(f"{view_func.__name__} - {request.path}")
             return response
+
+    def normalize_host(host):
+        """Normalize host for allow-list checks."""
+        if not host:
+            return ""
+
+        value = host.strip().lower().rstrip(".")
+        if value.startswith("["):
+            end = value.find("]")
+            if end != -1:
+                return value[1:end]
+
+        if ":" in value:
+            return value.rsplit(":", 1)[0]
+
+        return value
+
+    def is_allowed_host(host):
+        """Check host against configured allow-list with wildcard support."""
+        for pattern in app.config.get("ALLOWED_HOSTS", []):
+            normalized_pattern = (pattern or "").strip().lower().rstrip(".")
+            if not normalized_pattern:
+                continue
+            if normalized_pattern == "*" or fnmatch.fnmatch(host, normalized_pattern):
+                return True
+        return False
+
+    @app.before_request
+    def reject_disallowed_host():
+        """Reject requests with a Host header outside ALLOWED_HOSTS."""
+        raw_host = (request.host or request.headers.get("Host") or "").strip().lower()
+        normalized_host = normalize_host(raw_host)
+        if not normalized_host or not is_allowed_host(normalized_host):
+            abort(400)
 
     # Register security headers
     app.after_request(add_security_headers)

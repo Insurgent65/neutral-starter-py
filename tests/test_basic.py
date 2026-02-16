@@ -23,6 +23,18 @@ def test_index_page(client):
     assert response.status_code == 200
 
 
+def test_rejects_disallowed_host(client):
+    """Requests with disallowed Host must return 400."""
+    response = client.get("/", headers={"Host": "evil.example"})
+    assert response.status_code == 400
+
+
+def test_accepts_allowed_host(client):
+    """Requests with allowed Host must continue normally."""
+    response = client.get("/", headers={"Host": "localhost"})
+    assert response.status_code == 200
+
+
 def test_components_loaded(flask_app):
     """Test that components are correctly identified and loaded."""
     if hasattr(flask_app, "components") and flask_app.components:
