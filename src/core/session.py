@@ -29,7 +29,7 @@ class Session:
             "now": self.now
         })
 
-        if not result.get('rows') or not result['rows'][0]:
+        if not result or not result.get('rows') or not result['rows'][0]:
             return None, {}
 
         modified = result['rows'][0][4]
@@ -51,7 +51,7 @@ class Session:
                 "now": self.now
             })
 
-            if result['success']:
+            if result and result.get('success'):
                 self.model.exec('session', 'close', {
                     "sessionId": self._session_id,
                     "open": Config.SESSION_OPEN['false'],
