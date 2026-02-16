@@ -36,6 +36,7 @@ This starter is in active development. The architectural base is stable (compone
 *   Expanded security hardening for all optional modules and production scenarios.
 *   Complete test coverage for the remaining components and additional edge cases.
 *   Final stabilization of optional API-oriented components.
+*   Future hardening task: bind LTOKEN to route context to reduce cross-route replay (`LTOKEN = H(UTOKEN + SECRET + ROUTE)`), while preserving current UX flow.
 
 ## Overview
 
