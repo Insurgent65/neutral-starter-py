@@ -7,6 +7,12 @@ from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
 
 config = dotenv_values(APP_CONFIG_FILE)
 
+def _env_bool(value, default=False):
+    """Parse env flag: only 'true' enables it; anything else is False."""
+    if value is None:
+        return default
+    return str(value).strip().lower() == 'true'
+
 class Config: # pylint: disable=too-few-public-methods
     """Configuration class."""
 
@@ -30,12 +36,12 @@ class Config: # pylint: disable=too-few-public-methods
     _allowed_hosts_raw = config.get('ALLOWED_HOSTS', SITE_DOMAIN or '')
     ALLOWED_HOSTS = [item.strip().lower() for item in _allowed_hosts_raw.split(',') if item.strip()]
     TRUSTED_PROXY_CIDRS = [item.strip() for item in config.get('TRUSTED_PROXY_CIDRS', '').split(',') if item.strip()]
-    NEUTRAL_IPC=config.get('NEUTRAL_IPC', 'False').lower() == 'true'
-    NEUTRAL_CACHE_DISABLE=config.get('NEUTRAL_CACHE_DISABLE', 'False').lower() == 'true'
+    NEUTRAL_IPC = _env_bool(config.get('NEUTRAL_IPC'), False)
+    NEUTRAL_CACHE_DISABLE = _env_bool(config.get('NEUTRAL_CACHE_DISABLE'), False)
     DEFAULT_SCHEMA = os.path.join(BASE_DIR, "app", "schema.json")
     TEMPLATE_NAME = config.get('TEMPLATE_NAME', 'index.ntpl')
     TEMPLATE_NAME_ERROR = config.get('TEMPLATE_NAME_ERROR', 'error.ntpl')
-    TEMPLATE_HTML_MINIFY = config.get('TEMPLATE_HTML_MINIFY', 'False').lower() == 'true'
+    TEMPLATE_HTML_MINIFY = _env_bool(config.get('TEMPLATE_HTML_MINIFY'), False)
     TEMPLATE_MAIL = os.path.join(BASE_DIR, "neutral", "mail")
     MODEL_DIR = os.path.join(BASE_DIR, "model")
     COMPONENT_DIR = os.path.join(BASE_DIR, "component")
@@ -53,7 +59,7 @@ class Config: # pylint: disable=too-few-public-methods
     SIGNREMINDER_LIMITS = config.get('SIGNREMINDER_LIMITS', "5 per 30 minutes")
     SIGNT_LIMITS = config.get('SIGNT_LIMITS', "5 per 30 minutes")
 
-    VALIDATE_SIGNUP = config.get('VALIDATE_SIGNUP', 'False').lower() == 'true'
+    VALIDATE_SIGNUP = _env_bool(config.get('VALIDATE_SIGNUP'), False)
 
     LANG_KEY = "lang"
     THEME_KEY = "theme"
@@ -78,7 +84,7 @@ class Config: # pylint: disable=too-few-public-methods
     MAIL_TO_FILE = config.get('MAIL_TO_FILE', '/tmp/test_mail.html')
     MAIL_SERVER = config.get('MAIL_SERVER', '')
     MAIL_PORT = config.get('MAIL_PORT', 587)
-    MAIL_USE_TLS = config.get('MAIL_USE_TLS', False)
+    MAIL_USE_TLS = _env_bool(config.get('MAIL_USE_TLS'), False)
     MAIL_USERNAME = config.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = config.get('MAIL_PASSWORD', '')
     MAIL_SENDER = config.get('MAIL_SENDER', '')
@@ -150,6 +156,6 @@ class Config: # pylint: disable=too-few-public-methods
     CSP_ALLOWED_CONNECT = config.get('CSP_ALLOWED_CONNECT', '').split(',')
 
     # CSP Unsafe options (optional) - enable only when necessary
-    CSP_ALLOWED_SCRIPT_UNSAFE_INLINE = config.get('CSP_ALLOWED_SCRIPT_UNSAFE_INLINE', 'False').lower() == 'true'
-    CSP_ALLOWED_SCRIPT_UNSAFE_EVAL = config.get('CSP_ALLOWED_SCRIPT_UNSAFE_EVAL', 'False').lower() == 'true'
-    CSP_ALLOWED_STYLE_UNSAFE_INLINE = config.get('CSP_ALLOWED_STYLE_UNSAFE_INLINE', 'False').lower() == 'true'
+    CSP_ALLOWED_SCRIPT_UNSAFE_INLINE = _env_bool(config.get('CSP_ALLOWED_SCRIPT_UNSAFE_INLINE'), False)
+    CSP_ALLOWED_SCRIPT_UNSAFE_EVAL = _env_bool(config.get('CSP_ALLOWED_SCRIPT_UNSAFE_EVAL'), False)
+    CSP_ALLOWED_STYLE_UNSAFE_INLINE = _env_bool(config.get('CSP_ALLOWED_STYLE_UNSAFE_INLINE'), False)

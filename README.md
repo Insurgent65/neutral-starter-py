@@ -199,6 +199,8 @@ Configuration is handled in layers:
 2.  **Per Component**: `schema.json` within each component.
 3.  **Customization**: `custom.json` (ignored by git) allows overriding local configurations without affecting the codebase.
 
+Boolean environment variables follow a strict rule: **only** `true` (case-insensitive) enables the flag. Any other value (`false`, `0`, `no`, empty, typo) is treated as `False`.
+
 ## Security & CSP
 
 The application implements a strict **Content Security Policy (CSP)**. By default, external resources are blocked unless explicitly allowed in the configuration.
