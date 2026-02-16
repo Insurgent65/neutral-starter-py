@@ -31,12 +31,19 @@ This starter is in active development. The architectural base is stable (compone
 *   **URL Routing**: Flexible URL routing system with component-specific routes.
 *   **Expanded Testing Coverage**: Unit/integration tests are present for app bootstrap and multiple routed components.
 
-### In Progress / Pending Hardening
+### Current Project Status
 
-*   Expanded security hardening for all optional modules and production scenarios.
-*   Complete test coverage for the remaining components and additional edge cases.
-*   Final stabilization of optional API-oriented components.
-*   Future hardening task: bind LTOKEN to route context to reduce cross-route replay (`LTOKEN = H(UTOKEN + SECRET + ROUTE)`), while preserving current UX flow.
+The project includes:
+
+- ✅ **Test coverage** for application bootstrap and multiple routed components
+- ✅ Stable and tested modular architecture
+- ✅ Fully functional core components
+
+#### Planned Improvements
+- Security optimization for optional modules in production scenarios
+- Expanded test coverage for additional edge cases
+- Final stabilization of API-oriented components
+- Security enhancement: Implementation of LTOKEN binding to route context (`LTOKEN = H(UTOKEN + SECRET + ROUTE)`) for improved security while maintaining current user experience
 
 ## Overview
 
