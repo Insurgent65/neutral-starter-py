@@ -16,7 +16,6 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import SQLAlchemyError
 from app.config import Config
-# from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
 
 
 class Model:

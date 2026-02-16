@@ -1,5 +1,6 @@
 """Fill the schema with default values"""
 
+import os
 import copy
 import fnmatch
 from http.cookies import SimpleCookie
@@ -8,7 +9,7 @@ import woothee
 from flask import current_app
 
 from app.config import Config
-from constants import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from constants import TMP_DIR
 from utils.utils import get_ip, merge_dict
 
 

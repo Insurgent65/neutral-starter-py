@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import time
 # import json
 import bcrypt
-from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
+from constants import USER_EXISTS, UNCONFIRMED, UNVALIDATED, PIN_TARGET_REMINDER
 from utils.sbase64url import sbase64url_sha256, sbase64url_token
 from app.config import Config
 from .model import Model

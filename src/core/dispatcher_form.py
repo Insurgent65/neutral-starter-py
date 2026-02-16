@@ -8,7 +8,6 @@ from datetime import datetime
 import fnmatch
 import regex
 import dns.resolver
-from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
 from utils.tokens import ltoken_check
 from .dispatcher import Dispatcher
 

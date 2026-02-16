@@ -5,7 +5,7 @@ import secrets
 import time
 
 from app.config import Config
-from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
+from constants import SECONDS_MINUTE
 from .model import Model
 
 

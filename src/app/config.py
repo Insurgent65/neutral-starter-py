@@ -3,7 +3,15 @@
 import os
 from pathlib import Path
 from dotenv import dotenv_values
-from constants import * # pylint: disable=wildcard-import,unused-wildcard-import
+from constants import (
+    APP_CONFIG_FILE,
+    SRC_DIR,
+    VENV_DIR,
+    DELETED,
+    UNCONFIRMED,
+    UNVALIDATED,
+    SPAM,
+)
 
 config = dotenv_values(APP_CONFIG_FILE)
 
