@@ -454,22 +454,22 @@ A unique random nonce generated per request for Content Security Policy complian
 
 A persistent token stored in a client cookie that identifies the browser/tab session. It is used as the basis for generating LTOKENs and form tokens.
 
-- **Behavior on GET requests**: The UTOKEN is **rotated** (updated with a new value). This means each page load generates a fresh token.
-- **Behavior on POST / AJAX requests**: The UTOKEN is **extracted** but not rotated. This prevents token mismatch during form submissions.
+- **Behavior on GET (non-AJAX) requests**: The UTOKEN is processed with `utoken_update(...)`. It is only rotated when expired (`UTOKEN_IDLE_EXPIRES_SECONDS`, default `14400`), otherwise the same token is kept and its timestamp is refreshed.
+- **Behavior on POST / AJAX requests**: The UTOKEN is extracted without forced rotation (`utoken_extract(...)`) to preserve request consistency during form submissions and AJAX flows.
 - **Stored in**: `schema_data['CONTEXT']['UTOKEN']`
 - **Cookie name**: Configured via `Config.UTOKEN_KEY`
 
 ```python
 # Internal logic (in parse_utoken):
 if self.req.method == 'GET' and not self.ajax_request:
-    # Rotate token
+    # Rotate only if expired, otherwise keep token and refresh timestamp
     utoken_token, utoken_cookie = utoken_update(...)
 else:
-    # Keep current token
+    # Keep current token (no forced rotation)
     utoken_token, utoken_cookie = utoken_extract(...)
 ```
 
-> **Important**: Because the UTOKEN rotates on every GET request, form links generated on one page must be submitted before the next GET navigation, or the LTOKEN derived from the old UTOKEN will become invalid.
+> **Important**: UTOKEN is intentionally not force-rotated on POST/AJAX requests. This avoids token desynchronization between the parent page and AJAX-loaded content/forms.
 
 ### LTOKEN — Link Token
 

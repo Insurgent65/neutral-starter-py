@@ -97,6 +97,7 @@ SQL is defined in JSON files in `src/model/`.
     ```bash
     cp -r src/component/cmp_7000_hellocomp src/component/cmp_8000_dashboard
     ```
+    `cmp_7000_hellocomp` is an illustrative example component. In production, disable or remove it if you do not explicitly need it.
 
 2.  **Configuration**:
     *   Edit `manifest.json`:
@@ -190,6 +191,16 @@ Refer to `docs/templates-neutrats.md` for full syntax.
     *   Components: `cmp_NNNN_name`.
     *   UUIDs: specific format (alphanumeric + underscore).
 4.  **Tokens**: The system automatically handles `UTOKEN` (User identity token) and `LTOKEN` (Link/Form token) to prevent CSRF. Ensure your forms include the necessary token fields (usually handled by `form-start` snippet).
+
+### 5.1 Operational Security Configuration
+
+Set and review these variables in `config/.env` before production deployment:
+
+- `ALLOWED_HOSTS`: Comma-separated host allow-list (`localhost,*.example.com`). Requests with non-allowed `Host` are rejected (`400`).
+- `TRUSTED_PROXY_CIDRS`: Comma-separated CIDRs for trusted reverse proxies. Forwarded headers are only honored from these sources.
+- `WSGI_DEBUG_ALLOWED`: Additional debug gate for WSGI entrypoints. Keep as `false` in production.
+- `DEBUG_EXPIRE`: Debug flag lifetime in seconds. `0` disables debug guard activation.
+- `DEBUG_FILE`: Guard file path used by debug activation checks. Keep unset in production unless debugging intentionally.
 
 ---
 
