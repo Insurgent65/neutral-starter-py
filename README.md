@@ -6,92 +6,54 @@ This project is designed to be extensible via a "plug-and-play" component archit
 
 ## Project Status
 
-This starter is in active development. The architectural base is stable (component system, routing, templating, auth/session foundations), while some areas are still being hardened and expanded (full test coverage, production hardening, and some optional components).
+This starter is in active development.
+
+- Stable base: component loading, routing, template rendering, security headers, auth/session foundations.
+- Ongoing work: broader edge-case test coverage and hardening of optional modules for production use.
 
 ## Features
 
-*   **Solid Backend**: Built on **Flask**, leveraging its ecosystem and simplicity.
-*   **Modular Component Architecture**: Everything is a component. Logic, routes, templates, and configurations are encapsulated in independent modules within `src/component`.
-*   **PWA Ready**: Configuration ready for Service Workers, manifests, and mobile optimization.
-*   **Neutral Templating (NTPL)**: Powerful templating system allowing inheritance, mixins, and dynamic rendering.
-*   **Override System**: Customize base components without touching their original code thanks to the cascading loading system.
-*   **Internationalization Support (i18n)**: Multi-language support configurable per component.
-*   **Security Headers & CSP**: X-Frame-Options, X-Content-Type-Options, and strict Content Security Policy.
-*   **CSRF Protection**: Form token protection against Cross-Site Request Forgery attacks.
-*   **Rate Limiting**: Built-in protection against abuse and brute force attacks.
-*   **Responsive Design**: Adaptable to different devices and screen sizes.
-*   **Database Integration**: Support for database connections and SQL queries.
-*   **Customizable Themes**: Theme system with multiple theme support.
-*   **Session Management**: Session handling with secure cookie attributes.
-*   **Form Validation**: Input validation rules defined in schemas.
-*   **Authentication Flows**: Sign-in, sign-up, reminder and PIN confirmation flows.
-*   **Configuration Management**: Layered configuration system (global, per-component, and local overrides).
-*   **Static File Serving**: Organized static file serving by component.
-*   **Template Rendering**: Dynamic template rendering with caching support.
-*   **URL Routing**: Flexible URL routing system with component-specific routes.
-*   **Expanded Testing Coverage**: Unit/integration tests are present for app bootstrap and multiple routed components.
-
-### Current Project Status
-
-The project includes:
-
-- ✅ **Test coverage** for application bootstrap and multiple routed components
-- ✅ Stable and tested modular architecture
-- ✅ Fully functional core components
-
-#### Planned Improvements
-- Security optimization for optional modules in production scenarios
-- Expanded test coverage for additional edge cases
-- Final stabilization of API-oriented components
-- Security enhancement: Implementation of LTOKEN binding to route context (`LTOKEN = H(UTOKEN + SECRET + ROUTE)`) for improved security while maintaining current user experience
-
-## Overview
-
-Neutral TS Starter Py is a modular web application built on Flask following a component-based architectural pattern. The application enables the creation of customizable web interfaces with support for multiple languages, PWA capabilities, and robust security features.
-
-The project is organized around a modular component system where each component encapsulates its own logic, routes, templates, and configuration, allowing for easy extension and customization.
+*   **Flask application factory** with component-driven routing and blueprint registration.
+*   **Modular component architecture** in `src/component` (manifest, schema, routes, templates, static assets).
+*   **Neutral TS templating (NTPL)** with snippet composition and schema-driven data.
+*   **Override model** using `custom.json` for local, per-component customization.
+*   **Security defaults**: CSP, host allow-list validation, trusted proxy header guard, and security headers.
+*   **Abuse protection**: form/session token flows and request rate limiting via Flask-Limiter.
+*   **PWA support**: service worker, offline page, and web manifest component.
+*   **Internationalization (i18n)** through component locale files (`locale-*.json`).
+*   **Multiple data backends** configured from environment (SQLite by default).
+*   **Automated tests** for app bootstrap and component behavior (`pytest`).
 
 ## Application Architecture
 
-The application follows a layered architecture pattern with clear separation of concerns:
+The project uses a layered architecture with clear responsibilities:
 
-### 1. Presentation Layer
-- **Templates**: Uses the NeutralTemplate templating engine
-- **Styles**: Customizable CSS per component
-- **Interactivity**: Modular JavaScript per component
-- **Static Resources**: CSS, JS, images organized by component
+### 1. Presentation
+- NTPL templates, component CSS/JS, and static assets.
 
-### 2. Application Logic Layer
-- **Routes**: Defined in component route modules
-- **Controllers**: Component-specific logic
-- **Middleware/Guards**: Request handling, security headers, proxy/header guards, and route-level access checks
+### 2. Application Logic
+- Component routes/controllers plus request guards (security headers, host/proxy checks, access rules).
 
-### 3. Data Layer
-- **Models**: Defined in `src/model/`
-- **SQL Queries**: Stored in JSON files
-- **Database Connection**: Configured in `src/app/`
+### 3. Data
+- JSON-backed models in `src/model/` and DB connectivity configured from `src/app/config.py`.
 
-### 4. Service Layer
-- **Utilities**: Helper functions in `src/utils/`
-- **Configuration**: Global and component-specific parameters
-- **Internationalization**: Language management in component locales
+### 4. Services
+- Shared utilities, environment/config loading, and i18n locale resolution.
 
 ### Request Flow
 
 ```
 HTTP Client
     ↓
-Security Middleware
+Security + Host/Proxy Guards
     ↓
-Main Router
+Flask Router + Component Blueprint
     ↓
-[Select Component]
+Component Route/Dispatcher
     ↓
-Component Logic
+Model/DB Access
     ↓
-Model/Data
-    ↓
-Rendered Template
+NTPL Render
     ↓
 HTTP Response
 ```
@@ -117,14 +79,22 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
-### 2. Install Dependencies
+### 2. Create Runtime Configuration
+
+```bash
+cp config/.env.example config/.env
+```
+
+At minimum, set a strong value for `SECRET_KEY` in `config/.env`.
+
+### 3. Install Dependencies
 
 ```bash
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Run in Development with Debugging
+### 4. Run in Development with Debugging
 
 ```bash
 source .venv/bin/activate
@@ -176,6 +146,8 @@ The strength of this starter lies in `src/component`. Each folder there is a sel
     *   `static/`: Specific assets (JS/CSS).
     *   `__init__.py`: Component initialization.
 
+Folders that do not start with `cmp_` are skipped by the loader. This is used for disabled/optional components (for example `_cmp_*`).
+
 ### Component Structure
 
 Each component follows this structure:
@@ -205,13 +177,28 @@ For a detailed example, see the [Hello Component README](src/component/cmp_7000_
 Configuration is handled in layers:
 1.  **Global**: Environment variables and Flask configuration.
 2.  **Per Component**: `schema.json` within each component.
-3.  **Customization**: `custom.json` (ignored by git) allows overriding local configurations without affecting the codebase.
+3.  **Customization**: `custom.json` allows overriding local configurations without affecting the codebase. It is ignored by git by default, with explicit repository exceptions such as the example `hellocomp` component.
 
 Boolean environment variables follow a strict rule: **only** `true` (case-insensitive) enables the flag. Any other value (`false`, `0`, `no`, empty, typo) is treated as `False`.
 
 ## Security & CSP
 
 The application implements a strict **Content Security Policy (CSP)**. By default, external resources are blocked unless explicitly allowed in the configuration.
+
+In addition to CSP, production deployments should explicitly configure host and proxy trust boundaries:
+
+```ini
+# Allowed request hosts (comma separated, wildcard supported)
+# Example: localhost,*.example.com,my-other-domain.org
+ALLOWED_HOSTS=localhost
+
+# Trusted reverse proxy CIDRs (comma separated)
+# Example: 127.0.0.1/32,::1/128,10.0.0.0/8
+TRUSTED_PROXY_CIDRS=
+```
+
+`ALLOWED_HOSTS` is enforced on every request. Requests with a Host header outside this allow-list are rejected with `400`.
+`TRUSTED_PROXY_CIDRS` defines which upstream proxies are allowed to supply forwarded headers. If a request does not come from a trusted proxy, forwarded headers are stripped before Flask processes the request.
 
 To ensure the core theme and components work correctly, you **must** whitelist the necessary CDNs in your `config/.env` file:
 
@@ -282,19 +269,7 @@ pytest -q
 
 Component tests are located under each component folder in `src/component/*/tests/`, with shared fixtures in `src/component/conftest.py`.
 
-Current covered component suites include:
-
-* `cmp_1200_backtotop`
-* `cmp_2000_http_errors`
-* `cmp_2300_ftoken`
-* `cmp_5100_home`
-* `cmp_5100_sign`
-* `cmp_5200_pwa`
-* `cmp_6000_aichat`
-* `cmp_6100_rrss`
-* `cmp_7000_hellocomp`
-* `cmp_7000_info`
-* `cmp_9100_catch_all`
+Test scope evolves with the component set. Use the repository as source of truth (`src/component/*/tests/` and `tests/`), rather than a fixed list in this README.
 
 Tests resolve blueprint names from the component directory at runtime (`bp_{component_folder}`), so they remain valid if a component changes numeric prefix (for example `cmp_1200_backtotop` to `cmp_1300_backtotop`).
 
