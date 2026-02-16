@@ -31,6 +31,7 @@ class Config: # pylint: disable=too-few-public-methods
     SECRET_KEY = config.get('SECRET_KEY')
     SITE_DOMAIN = config.get('SITE_DOMAIN')
     SITE_URL = config.get('SITE_URL')
+    REFERRER_POLICY = (config.get('REFERRER_POLICY') or 'strict-origin-when-cross-origin').strip()
     # Comma separated list with wildcard support. Example:
     # ALLOWED_HOSTS=localhost,*.example.com,my-other-domain.org
     _allowed_hosts_raw = config.get('ALLOWED_HOSTS', SITE_DOMAIN or '')

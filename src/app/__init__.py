@@ -68,7 +68,7 @@ class TrustedProxyHeaderGuard:
 
 def add_security_headers(response): # pylint: disable=too-many-locals
     """Add security headers to the response."""
-    from flask import g  # pylint: disable=import-outside-toplevel
+    from flask import g, current_app  # pylint: disable=import-outside-toplevel
 
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -76,14 +76,15 @@ def add_security_headers(response): # pylint: disable=too-many-locals
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains"
     )
+    response.headers["Referrer-Policy"] = current_app.config.get(
+        "REFERRER_POLICY", "strict-origin-when-cross-origin"
+    )
 
     # Get nonce from Flask.g
     nonce = getattr(g, "csp_nonce", None)
     nonce_str = f" 'nonce-{nonce}'" if nonce else ""
 
     # Content Security Policy
-    from flask import current_app  # pylint: disable=import-outside-toplevel
-
     def get_csp_string(key):
         return " ".join(filter(None, current_app.config.get(key, [])))
 

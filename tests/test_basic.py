@@ -35,6 +35,12 @@ def test_accepts_allowed_host(client):
     assert response.status_code == 200
 
 
+def test_referrer_policy_header_default(client):
+    """Referrer-Policy must be sent with the configured default value."""
+    response = client.get("/")
+    assert response.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+
+
 def test_components_loaded(flask_app):
     """Test that components are correctly identified and loaded."""
     if hasattr(flask_app, "components") and flask_app.components:

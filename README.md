@@ -209,6 +209,9 @@ The application implements a strict **Content Security Policy (CSP)**. By defaul
 To ensure the core theme and components work correctly, you **must** whitelist the necessary CDNs in your `config/.env` file:
 
 ```ini
+# Referrer policy (SEO-friendly: cross-site requests receive only origin, not path)
+REFERRER_POLICY=strict-origin-when-cross-origin
+
 # Security Content-Security-Policy (CSP) allowed domains
 CSP_ALLOWED_SCRIPT=https://cdnjs.cloudflare.com
 CSP_ALLOWED_STYLE=https://cdnjs.cloudflare.com,https://fonts.googleapis.com
@@ -221,6 +224,8 @@ CSP_ALLOWED_SCRIPT_UNSAFE_INLINE=false
 CSP_ALLOWED_SCRIPT_UNSAFE_EVAL=false
 CSP_ALLOWED_STYLE_UNSAFE_INLINE=false
 ```
+
+`REFERRER_POLICY` is configurable. The default (`strict-origin-when-cross-origin`) keeps path/query for same-origin navigation but sends only origin on cross-origin HTTPS requests.
 
 If you add new external resources (JS, CSS, fonts), remember to update these variables to avoid console errors and broken layouts.
 
