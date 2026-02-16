@@ -22,7 +22,7 @@ This means `{:fetch; ... :}` still works as expected, as long as `neutral.min.js
 
 Official Neutral TS reference:
 
-- https://franbarinstance.github.io/neutralts-docs/docs/neutralts/doc/#fetch--
+- [Neutral TS Fetch Documentation](https://franbarinstance.github.io/neutralts-docs/docs/neutralts/doc/#fetch--)
 
 ## Plain JavaScript Behavior
 
