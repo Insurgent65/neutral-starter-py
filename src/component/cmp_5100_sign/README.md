@@ -13,11 +13,22 @@ The **Sign** component manages all user authentication processes, including sign
 - **User Authentication**: Secure sign-in and sign-up flows.
 - **Session Management**: Logout functionality and session state handling.
 - **Password Recovery**: Support for password reminders via email.
-- **PIN Verification**: Handles PIN-based verification and registration steps.
+- **PIN Verification**: Supports both signup confirmation and reminder access using token + PIN.
 - **Privacy First**: Silent reminders when a user tries to register with an existing email, preventing account enumeration.
 - **Form Validation**: Comprehensive server-side and client-side validation rules defined in `schema.json`.
 - **Modals & Navigation**: Pre-configured menu entries for Navbar, Drawer, and User menus, including modal triggers for Bootstrap.
 - **Multilingual**: Built-in support for English, Spanish, French, and German.
+
+## Current Status
+
+- `signup` flow is operational: user is created, mail is sent, and account can be confirmed with PIN.
+- `PIN` flow is operational for both targets:
+  - `UNCONFIRMED` target: confirms account, removes disabled state, removes PIN, creates session.
+  - `reminder` target: one-time PIN validation, removes PIN, creates session.
+- PIN route follows the same container/ajax pattern as sign-in:
+  - Container: `/sign/pin/<pin_token>`
+  - AJAX form: `/sign/pin/form/<pin_token>/<ltoken>`
+- `VALIDATE_SIGNUP` remains `false` by default (see TODO for `UNVALIDATED` lifecycle).
 
 ## File Structure
 
@@ -39,7 +50,7 @@ The component populates several menu structures:
 - **Menu**: Accessible via user profile, providing direct links to authentication pages.
 
 ### Form Validation
-Rules for `sign_in_form`, `sign_up_form`, and `sign_reminder_form` are strictly defined under `data -> core -> forms`. These include:
+Rules for `sign_in_form`, `sign_up_form`, `sign_reminder_form`, and `sign_pin_form` are strictly defined under `data -> core -> forms`. These include:
 - Required fields.
 - Regex patterns (email, password, alias).
 - Length constraints.
@@ -56,7 +67,8 @@ Rules for `sign_in_form`, `sign_up_form`, and `sign_reminder_form` are strictly 
 | `/sign/reminder` | GET | Renders the password reminder page. |
 | `/sign/reminder/form/<ltoken>` | GET/POST | Processes password reminder requests. |
 | `/sign/out` | GET | Finalizes the user session and logs out. |
-| `/sign/pin/<token>` | GET/POST | Handles PIN-based verification or actions. |
+| `/sign/pin/<token>` | GET | Renders the PIN verification page container. |
+| `/sign/pin/form/<token>/<ltoken>` | GET/POST | Handles the PIN form (AJAX) for verification/login. |
 | `/sign/help/<item>` | GET | Serves help content for specific auth items (cached). |
 
 ## Integration
@@ -78,25 +90,13 @@ To link to a specific authentication page from another component, use the define
 - **Rate Limiting**: Applied to sensitive routes (sign-in, sign-up, reminder) as defined in `app.config.Config`.
 - **Session Security**: Sessions are tied to the User Agent and use secure cookies.
 
-## Pending Tasks (Required for Correct + Secure Sign Flow)
+## Tests
 
-- [ ] Implement the real `/sign/pin/<pin_token>` flow (GET + POST) in `route/routes.py` and `route/dispatcher_form_sign.py`; current implementation is provisional and does not validate token/PIN correctly.
-- [ ] Replace the wrong dispatcher wiring in `POST /sign/pin/<pin_token>` (currently uses `DispatcherFormSignUp(..., "email")`, which can trigger form validation mismatch and 500 errors).
-- [ ] Add a dedicated `sign_pin_form` definition in `schema.json` (allowed fields, rules, `ftoken`, `notrobot`, rate limit strategy) and use it in the PIN dispatcher.
-- [x] Fix PIN target consistency between creation and validation in `src/core/user.py`:
-  - creation currently stores a signup PIN with target `str(Config.DISABLED[UNCONFIRMED])`
-  - login validation checks target `f"{userId}_{Config.DISABLED[UNCONFIRMED]}"`
-  - these must match or unconfirmed accounts cannot be confirmed by PIN.
-- [x] Complete signup confirmation email sending in `DispatcherFormSignUp.form_post` (`mail.send("register", ...)` is currently commented); without this, users do not receive confirmation link/PIN.
-- [x] Remove the hardcoded hidden PIN in `neutral/route/root/in/form/snippets.ntpl` (`value="12345"`), because it is insecure and can create inconsistent behavior in login validation.
-- [ ] Implement proper PIN page templates in `neutral/route/root/pin/*` (current page is placeholder text `unconfimed`, no real form/feedback).
-- [ ] Add automated tests for critical auth paths:
-  - signup creates user + disabled states + PIN
-  - signup confirmation via `/sign/pin/<token>` removes `UNCONFIRMED`
-  - login blocked/allowed transitions for `UNCONFIRMED` and `UNVALIDATED`
-  - invalid/expired/reused PIN and token handling
-  - no uncaught 500 responses in auth routes.
-
+- Component test suite: `src/component/cmp_5100_sign/tests/test_sign_component.py`
+- Run only this component:
+  - `source .venv/bin/activate && pytest -q src/component/cmp_5100_sign/tests`
+- Run full project suite:
+  - `source .venv/bin/activate && pytest -q`
 
 ## TODO
 - [ ] Define and implement the `UNVALIDATED` lifecycle (how it is cleared when `Config.VALIDATE_SIGNUP=True`); right now users can remain blocked even after confirmation.

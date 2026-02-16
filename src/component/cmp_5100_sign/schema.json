@@ -176,6 +176,37 @@
                         }
                     }
                 },
+                "sign_pin_form": {
+                    "check_fields": [
+                        "pin",
+                        "notrobot-hidden",
+                        "notrobot"
+                    ],
+                    "validation": {
+                        "minfields": 2,
+                        "maxfields": 4,
+                        "allow_fields": [
+                            "pin",
+                            "notrobot-hidden",
+                            "notrobot",
+                            "ftoken.*"
+                        ]
+                    },
+                    "rules": {
+                        "pin": {
+                            "required": true,
+                            "pattern": "^[A-Za-z0-9]{4,10}$",
+                            "regex": "^[A-Za-z0-9]{4,10}$"
+                        },
+                        "notrobot": {
+                            "required": true,
+                            "value": "human"
+                        },
+                        "notrobot-hidden": {
+                            "set": false
+                        }
+                    }
+                },
                 "sign_out_form": {
                     "check_fields": [],
                     "validation": {},

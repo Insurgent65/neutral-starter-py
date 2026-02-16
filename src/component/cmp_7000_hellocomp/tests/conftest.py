@@ -8,12 +8,20 @@ When the component is distributed independently, these fixtures
 allow testing without the main application's test configuration.
 """
 
+import os
 import sys
 
 import pytest
 
 from app import create_app
 from app.config import Config
+
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_COMP_DIR = os.path.dirname(_BASE_DIR)
+_ROUTE_DIR = os.path.join(_COMP_DIR, "route")
+
+if _ROUTE_DIR not in sys.path:
+    sys.path.insert(0, _ROUTE_DIR)
 
 
 class TestConfig(Config):

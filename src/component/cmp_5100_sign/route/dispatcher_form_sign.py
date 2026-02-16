@@ -1,9 +1,11 @@
 """Dispatcher for sign-related forms (sign-in, sign-up, sign-out, etc.)."""
 
+import time
+
 from ftoken_0yt2sa import ftoken_check
 
 from app.config import Config
-from constants import UNCONFIRMED, UNVALIDATED, USER_EXISTS
+from constants import PIN_TARGET_REMINDER, UNCONFIRMED, UNVALIDATED, USER_EXISTS
 from core.dispatcher_form import DispatcherForm
 from core.mail import Mail
 from utils.utils import format_ua
@@ -96,6 +98,25 @@ class DispatcherFormSign(DispatcherForm):
 
         return True
 
+    def create_session(self, user_data) -> bool:
+        """Create a new user session after successful authentication."""
+        session_data = {
+            "PATH": self.schema_data["CONTEXT"]["PATH"],
+            "METHOD": self.schema_data["CONTEXT"]["METHOD"],
+            "HEADERS": self.schema_data["CONTEXT"]["HEADERS"],
+            "UA": self.schema_data["CONTEXT"]["UA"],
+            "user_data": user_data,
+        }
+
+        ua = self.schema_data["CONTEXT"].get("UA", "")
+        session_ua = format_ua(ua) if ua else "none"
+
+        session_cookie = self.session.create(user_data["userId"], session_ua, session_data)
+        self.schema_data["CONTEXT"]["SESSION"] = session_cookie[Config.SESSION_KEY]["value"]
+        self.view.add_cookie(session_cookie)
+
+        return True
+
 
 # In
 class DispatcherFormSignIn(DispatcherFormSign):
@@ -130,30 +151,6 @@ class DispatcherFormSignIn(DispatcherFormSign):
             return False
 
         return self.create_session(user_data)
-
-    def create_session(self, user_data) -> bool:
-        """Create a new user session after successful authentication."""
-        session_data = {
-            "PATH": self.schema_data["CONTEXT"]["PATH"],
-            "METHOD": self.schema_data["CONTEXT"]["METHOD"],
-            "HEADERS": self.schema_data["CONTEXT"]["HEADERS"],
-            "UA": self.schema_data["CONTEXT"]["UA"],
-            "user_data": user_data,
-        }
-
-        ua = self.schema_data["CONTEXT"].get("UA", "")
-        session_ua = format_ua(ua) if ua else "none"
-
-        session_cookie = self.session.create(
-            user_data["userId"], session_ua, session_data
-        )
-        self.schema_data["CONTEXT"]["SESSION"] = session_cookie[Config.SESSION_KEY][
-            "value"
-        ]
-        self.view.add_cookie(session_cookie)
-
-        return True
-
 
 # Up
 class DispatcherFormSignUp(DispatcherFormSign):
@@ -278,18 +275,111 @@ class DispatcherFormSignReminder(DispatcherFormSign):
 class DispatcherFormSignPin(DispatcherFormSign):
     """Handles PIN-based authentication or verification."""
 
-    def form_post(self) -> bool:
-        """Send a reminder email to the user."""
-        if not self.validate_post("ref:sign_reminder_form_error"):
+    def _get_pin_data_by_token(self, pin_token: str) -> dict | None:
+        """Resolve pin token to database row."""
+        result = self.user.model.exec(
+            "user",
+            "get-pin-by-token",
+            {"token": pin_token, "now": int(time.time())},
+        )
+        if not result or not result.get("rows") or not result["rows"][0]:
+            return None
+        row = result["rows"][0]
+        return {
+            "target": str(row[0]),
+            "userId": str(row[1]),
+            "pin": str(row[2]),
+        }
+
+    def _get_pin_target_kind(self, target: str) -> str | None:
+        """Classify supported PIN token targets."""
+        if target == str(Config.DISABLED[UNCONFIRMED]):
+            return "signup"
+        if target == PIN_TARGET_REMINDER:
+            return "reminder"
+        return None
+
+    def form_get(self, pin_token) -> bool:
+        """Validate token and prepare PIN page."""
+        if not self.valid_form_tokens_get():
             return False
 
-        # Always return success to avoid revealing user existence
+        self.schema_data["sign_pin_token"] = pin_token
+        pin_data = self._get_pin_data_by_token(pin_token)
+        target_kind = self._get_pin_target_kind(pin_data["target"]) if pin_data else None
+        if not pin_data or not target_kind:
+            self.schema_data["sign_pin_token_invalid"] = "true"
+            return False
+
+        self.schema_data["sign_pin_token_invalid"] = None
+        self.schema_data["sign_pin_token_valid"] = "true"
+        self.schema_data["sign_pin_target_kind"] = target_kind
+        return True
+
+    def validate_pin_post(self, error_prefix) -> bool:
+        """Validate POST request for token-based PIN confirmation."""
+
+        # Do not process while already logged in.
+        if self.schema_data["CONTEXT"]["SESSION"]:
+            self.error["form"]["already_session"] = "true"
+            return False
+
+        if not ftoken_check(
+            self._ftoken_field_name,
+            self.schema_data["CONTEXT"]["POST"],
+            self.schema_data["CONTEXT"]["UTOKEN"],
+        ):
+            self.error["form"]["ftoken"] = "true"
+            return False
+
+        if not self.valid_form_tokens_post():
+            return False
+
+        if not self.valid_form_validation():
+            return False
+
+        if self.any_error_form_fields(error_prefix):
+            return False
+
+        return True
+
+    def form_post(self, pin_token) -> bool:
+        """Validate token+PIN, confirm user, and create session."""
+        self.schema_data["sign_pin_token"] = pin_token
+        if not self.validate_pin_post("ref:sign_pin_form_error"):
+            return False
+
+        pin_data = self._get_pin_data_by_token(pin_token)
+        target_kind = self._get_pin_target_kind(pin_data["target"]) if pin_data else None
+        if not pin_data or not target_kind:
+            self.schema_data["sign_pin_token_invalid"] = "true"
+            return False
+
+        submitted_pin = str(self.schema_data["CONTEXT"]["POST"].get("pin") or "")
+        if submitted_pin != pin_data["pin"]:
+            self.error["field"]["pin"] = "Invalid PIN."
+            return False
+
+        user_id = pin_data["userId"]
+
+        if target_kind == "signup":
+            unconfirmed = Config.DISABLED[UNCONFIRMED]
+            self.user.model.exec(
+                "user",
+                "delete-disabled",
+                {"reason": unconfirmed, "userId": user_id},
+            )
+
+        self.user.model.exec(
+            "user",
+            "delete-pin",
+            {"target": pin_data["target"], "userId": user_id, "pin": pin_data["pin"]},
+        )
+
         self.form_submit["result"] = {
             "success": "true",
             "error": None,
             "message": None,
         }
 
-        self.send_reminder(self.schema_data["CONTEXT"]["POST"].get("email"))
-
-        return True
+        return self.create_session({"userId": user_id, "user_disabled": {}})

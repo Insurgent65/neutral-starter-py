@@ -255,7 +255,7 @@ class User:
             }
 
         user_id = user_data['userId']
-        target = 'reminder'
+        target = PIN_TARGET_REMINDER
         pin_params = self._build_user_pin_params(target, user_id)
 
         result = self.model.exec('user', 'insert-pin', pin_params)
