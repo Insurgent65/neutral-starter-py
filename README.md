@@ -4,6 +4,10 @@
 
 This project is designed to be extensible via a "plug-and-play" component architecture, allowing scalability from quick prototypes to complex applications while maintaining a clean and decoupled structure.
 
+## Project Status
+
+This starter is in active development. The architectural base is stable (component system, routing, templating, auth/session foundations), while some areas are still being hardened and expanded (full test coverage, production hardening, and some optional components).
+
 ## Features
 
 *   **Solid Backend**: Built on **Flask**, leveraging its ecosystem and simplicity.
@@ -18,19 +22,20 @@ This project is designed to be extensible via a "plug-and-play" component archit
 *   **Responsive Design**: Adaptable to different devices and screen sizes.
 *   **Database Integration**: Support for database connections and SQL queries.
 *   **Customizable Themes**: Theme system with multiple theme support.
-*   **Session Management**: Secure session handling and management.
+*   **Session Management**: Session handling with secure cookie attributes.
 *   **Form Validation**: Input validation rules defined in schemas.
-*   **File Upload Handling**: Support for file uploads with security controls.
-*   **Error Handling & Logging**: Comprehensive error handling and event logging system.
-*   **API Endpoints**: RESTful API support for component interactions.
-*   **Authentication & Authorization**: Built-in authentication and authorization mechanisms.
+*   **Authentication Flows**: Sign-in, sign-up, reminder and PIN confirmation flows.
 *   **Configuration Management**: Layered configuration system (global, per-component, and local overrides).
 *   **Static File Serving**: Organized static file serving by component.
 *   **Template Rendering**: Dynamic template rendering with caching support.
 *   **URL Routing**: Flexible URL routing system with component-specific routes.
-*   **Middleware Support**: Request handling, authentication, and authorization middleware.
-*   **Testing Framework**: Structure prepared for unit and integration testing.
-*   **Documentation Generation**: Automated documentation generation capabilities.
+*   **Testing Baseline**: Initial unit/integration tests are present and passing.
+
+### In Progress / Pending Hardening
+
+*   Expanded security hardening for all optional modules and production scenarios.
+*   Broader test coverage across all components and edge cases.
+*   Final stabilization of optional API-oriented components.
 
 ## Overview
 
@@ -51,7 +56,7 @@ The application follows a layered architecture pattern with clear separation of 
 ### 2. Application Logic Layer
 - **Routes**: Defined in component route modules
 - **Controllers**: Component-specific logic
-- **Middleware**: Request handling, authentication, authorization
+- **Middleware/Guards**: Request handling, security headers, proxy/header guards, and route-level access checks
 
 ### 3. Data Layer
 - **Models**: Defined in `src/model/`
@@ -85,7 +90,7 @@ HTTP Response
 
 ## Prerequisites
 
-*   Python 3.8 or higher.
+*   Python 3.10 or higher.
 *   pip (Python package manager).
 *   Recommended: Virtual environment (`venv`).
 
@@ -114,8 +119,14 @@ pip install -r requirements.txt
 ### 3. Run in Development with Debugging
 
 ```bash
-export FLASK_DEBUG=1
 source .venv/bin/activate
+
+# Optional debug guard (enabled only when all conditions are met)
+# 1) set DEBUG_EXPIRE and DEBUG_FILE in config/.env
+#    e.g. DEBUG_EXPIRE=3600 and DEBUG_FILE=/tmp/neutral-debug.flag
+export FLASK_DEBUG=1
+touch /tmp/neutral-debug.flag
+
 python src/run.py
 ```
 
@@ -228,6 +239,26 @@ Components can define their own translations in `neutral/route/locale-{lang}.jso
 ## Deployment
 
 For production, use a WSGI server like Gunicorn pointing to `src/wsgi.py`:
+
+```bash
+source .venv/bin/activate
+gunicorn --chdir src wsgi:application
+```
+
+Notes:
+
+*   Keep `FLASK_DEBUG` disabled in production.
+*   Configure `SECRET_KEY`, `SITE_DOMAIN`, `SITE_URL`, `ALLOWED_HOSTS`, and trusted proxy CIDRs in `config/.env`.
+*   For distributed deployments, configure a shared rate-limit backend (for example Redis) instead of `memory://`.
+
+## Testing
+
+Run test suite:
+
+```bash
+source .venv/bin/activate
+pytest -q
+```
 
 ## Documentation
 
