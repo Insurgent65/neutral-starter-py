@@ -24,6 +24,29 @@ It is designed for development/operations usage, not for public users.
 Important:
 - There is intentionally no navigation menu entry for `/dev-admin`.
 - This is by design (not an omission) to reduce discoverability and avoid exposing this sensitive endpoint through normal site navigation or accidental indexing paths.
+- For additional hardening, it is recommended to change the default route to a private/custom path.
+
+Example route override for component `devadmin_0yt2sa`:
+
+1. In `src/component/cmp_7050_dev_admin/custom.json` (local file):
+
+```json
+{
+    "manifest": {
+        "route": "/dev-admin-9x2kbd3ae10w"
+    }
+}
+```
+
+2. Or in `config/config.db` table `custom` with:
+- `comp_uuid = devadmin_0yt2sa`
+- `value_json`:
+
+```json
+{"manifest":{"route":"/dev-admin-9x2kbd3ae10w"}}
+```
+
+After changing route config, restart the application and use the new path.
 
 ## Security Model
 
