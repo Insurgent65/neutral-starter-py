@@ -12,6 +12,7 @@ from constants import UUID_MAX_LEN, UUID_MIN_LEN
 from utils.utils import merge_dict, parse_vars
 
 from .config import Config
+from .config_db import ensure_config_db, get_component_custom_override
 
 COMPONENT_SNIPPET_NAME = "core:include-components-register-ntpl"
 COMPONENT_INIT_FILE_NAME = "component-init.ntpl"
@@ -30,6 +31,8 @@ class Components:
         self.component_schema = {}
         self.component_snip = ""
         self.custom = {}
+        self.config_db_path = self.app.config.get("CONFIG_DB_PATH", Config.CONFIG_DB_PATH)
+        self.config_db_ready = ensure_config_db(self.config_db_path, debug=self.app.debug)
 
         # register components
         self._register_manifest()
@@ -58,7 +61,7 @@ class Components:
             manifest = self.get_manifest(path, name)
             uuid = manifest["uuid"]
 
-            self.custom[uuid] = self.get_custom(path, name)
+            self.custom[uuid] = self.get_custom(path, name, uuid)
 
             if "manifest" in self.custom[uuid]:
                 merge_dict(manifest, self.custom[uuid]["manifest"])
@@ -203,19 +206,26 @@ class Components:
         for uuid in self.component_schema:
             self.component_schema[uuid] = json.loads(parse_vars(json.dumps(self.component_schema[uuid]), self.schema))
 
-    def get_custom(self, path, name):
+    def get_custom(self, path, name, uuid):
         """Retrieves and validates manifest.json for a component."""
+        custom = {}
         custom_path = os.path.join(path, "custom.json")
 
-        if not os.path.isfile(custom_path):
-            return {}
+        if os.path.isfile(custom_path):
+            with open(custom_path, "r", encoding="utf-8") as file:
+                custom = json.load(file)
+                if not isinstance(custom, dict):
+                    raise ValueError(
+                        f"custom.json in component {name} must be a JSON object"
+                    )
 
-        with open(custom_path, "r", encoding="utf-8") as file:
-            custom = json.load(file)
-            if not isinstance(custom, dict):
-                raise ValueError(
-                    f"custom.json in component {name} must be a JSON object"
-                )
+        # Future-friendly generic config DB; currently used for custom-like overrides.
+        if self.config_db_ready:
+            custom_db = get_component_custom_override(
+                self.config_db_path, uuid, debug=self.app.debug
+            )
+            if custom_db:
+                merge_dict(custom, custom_db)
 
         return custom
 

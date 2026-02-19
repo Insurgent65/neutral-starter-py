@@ -6,6 +6,7 @@ This directory contains environment-based configuration for the app.
 
 - `.env.example`: template with all available environment variables.
 - `.env`: your local runtime configuration (not committed).
+- `config.db`: optional SQLite store for runtime configuration overrides (not committed).
 
 ## Quick Start
 
@@ -101,6 +102,12 @@ TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128,10.0.0.0/8
 | `TEMPLATE_NAME_ERROR` | Error layout filename. | `error.ntpl` |
 | `TEMPLATE_HTML_MINIFY` | Minify rendered HTML output. | `false` |
 | `STATIC_CACHE_CONTROL` | Cache-Control header for static responses. | `max-age=14400` |
+
+### Config Database
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CONFIG_DB_PATH` | Path to the SQLite config database used for central overrides. | `../config/config.db` |
 
 ### Rate Limiting
 

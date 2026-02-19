@@ -58,6 +58,10 @@ class Config: # pylint: disable=too-few-public-methods
 
     STATIC_FOLDER = os.path.join(BASE_DIR, "..", "public")
     STATIC_CACHE_CONTROL = config.get('STATIC_CACHE_CONTROL', "max-age=14400")
+    CONFIG_DB_PATH = (
+        config.get('CONFIG_DB_PATH', '')
+        or os.path.join(BASE_DIR, "..", "config", "config.db")
+    )
 
     LIMITER_STORAGE_URI = config.get('LIMITER_STORAGE_URI', 'memory://')
 

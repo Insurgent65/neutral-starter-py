@@ -178,6 +178,7 @@ Configuration is handled in layers:
 1.  **Global**: Environment variables and Flask configuration.
 2.  **Per Component**: `schema.json` within each component.
 3.  **Customization**: `custom.json` allows overriding local configurations without affecting the codebase. It is ignored by git by default, with explicit repository exceptions such as the example `hellocomp` component.
+4.  **Central Override DB (optional)**: `config/config.db` can store per-component JSON overrides by UUID. For overlapping keys, merge order is: base files -> `custom.json` -> `config.db`.
 
 Boolean environment variables follow a strict rule: **only** `true` (case-insensitive) enables the flag. Any other value (`false`, `0`, `no`, empty, typo) is treated as `False`.
 

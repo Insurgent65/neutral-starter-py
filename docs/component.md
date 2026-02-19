@@ -64,8 +64,8 @@ src/component/cmp_name/
 When starting the application, the system performs the following steps:
 
 1.  **Discovery**: Scans `src/component/` looking for folders starting with `cmp_`.
-2.  **Registration**: Reads `manifest.json`. If `custom.json` exists, its `manifest` section overrides the original.
-3.  **Data Merging**: Loads `schema.json`. If `custom.json` exists, its `schema` section is merged. Finally, it's merged into the global application schema.
+2.  **Registration**: Reads `manifest.json`. If `custom.json` exists, its `manifest` section overrides the original. If a matching entry exists in `config/config.db` (by component UUID), it is merged after `custom.json` and has final priority.
+3.  **Data Merging**: Loads `schema.json`. If `custom.json` exists, its `schema` section is merged. Then DB override data (if present) is merged. Finally, it's merged into the global application schema.
 4.  **Python Initialization**: Executes `init_component` in `__init__.py` (if it exists). This is often used to add the `lib/` directory to `sys.path`.
 5.  **Routes**: Executes `init_blueprint` in `route/__init__.py`. This creates the Flask Blueprint and registers routes.
 6.  **Global Templates**: Reads `neutral/component-init.ntpl`. Snippets here are registered globally. Evaluate on every request.
@@ -91,6 +91,13 @@ Defines the data structure and configuration. It is divided into critical sectio
 
 Allows overriding configuration without touching the original code.
 **Important Rule**: The component provider must never include this file; it is exclusively for local user customization.
+
+### config/config.db (optional)
+
+SQLite-backed configuration store for central overrides and future global settings.
+
+For component overrides, table `custom` uses `comp_uuid` (component UUID) as key.
+The `value_json` payload format matches `custom.json` (`manifest` and/or `schema` objects).
 
 ---
 
