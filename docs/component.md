@@ -305,5 +305,33 @@ pytest src/component/cmp_7000_hellocomp/tests
 ## 8. Debugging
 
 *   If a component does not load, check the `cmp_` prefix.
-*   If changes in `schema.json` are not reflected, check if an interfering `custom.json` exists.
+*   If changes in `schema.json` are not reflected, check if an interfering `custom.json` exists or if there is an active DB override in `config.db` table `custom` for the same `comp_uuid`.
 *   Use `{:;local::varname:}` for mutable data and `{:;varname:}` for immutable request data.
+
+---
+
+## 9. Admin Hardening Checklist
+
+For admin/restricted components (configuration panels, maintenance tools, internal ops views), apply this baseline:
+
+1.  **No public menu entry by default**
+    Keep routes undiscoverable from normal navigation and avoid linking from public pages.
+2.  **IP allow-list**
+    Restrict access to loopback/private/trusted ranges (and validate proxy trust boundaries).
+3.  **Credential gate**
+    Require dedicated admin credentials from environment variables (never hardcoded).
+4.  **CSRF protection on all state-changing actions**
+    Apply to login, save, delete, logout, and any POST/PUT/PATCH/DELETE endpoint.
+5.  **Login rate limiting**
+    Limit brute-force attempts per client IP/session.
+6.  **Strict input validation**
+    Validate IDs, JSON payload types, and allowed operations before persistence.
+7.  **Safe persistence**
+    Use parameterized SQL and explicit schema constraints.
+8.  **Operational guidance**
+    Document that production should disable the admin component unless explicitly required.
+9.  **Cache/restart awareness**
+    Document when changes may require cache invalidation or app restart.
+
+Recommended practice:
+- Keep admin security env vars reusable as a shared pattern across future admin components.

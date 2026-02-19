@@ -57,8 +57,14 @@ Components are loaded alphabetically based on their folder name (`cmp_NNNN_name`
     *   `manifest.json`: Registration info (UUID, Name, Route).
     *   `schema.json`: Configuration data (menus, constants, translations).
     *   `custom.json`: *Local-only* overrides (never committed to git).
+    *   `config/config.db` (table `custom`): Optional centralized per-component overrides keyed by UUID (`comp_uuid`) with JSON payload in `value_json`.
     *   `route/`: Python backend logic (Blueprints, Dispatchers).
     *   `neutral/`: Frontend templates (`.ntpl`).
+
+Override merge order:
+1. Base files (`manifest.json` / `schema.json`)
+2. `custom.json` (if present)
+3. `config.db` -> `custom.value_json` (if present and `enabled=1`)
 
 ### 3.2 The Request Pipeline
 1.  **Flask Route**: Receives HTTP request.

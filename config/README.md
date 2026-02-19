@@ -109,14 +109,27 @@ TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128,10.0.0.0/8
 |----------|-------------|---------|
 | `CONFIG_DB_PATH` | Path to the SQLite config database used for central overrides. | `../config/config.db` |
 
-### Dev Admin
+Component custom override support (current implementation):
+
+- Table: `custom`
+- Key field: `comp_uuid` (component UUID)
+- Payload field: `value_json` (JSON text with `custom.json` shape: `manifest` and/or `schema`)
+- Activation field: `enabled` (`1` active, `0` ignored by loader)
+- Merge order at runtime: base component files -> `custom.json` -> `config.db` (`custom.value_json`)
+
+### Admin Component Security (Reusable Pattern)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DEV_ADMIN_USER` | Username for `/dev-admin` access. | empty |
-| `DEV_ADMIN_PASSWORD` | Password for `/dev-admin` access. | empty |
-| `DEV_ADMIN_LOCAL_ONLY` | If `true`, only loopback IPs can access `/dev-admin`. | `true` |
-| `DEV_ADMIN_ALLOWED_IPS` | Comma-separated IPs/CIDRs additionally required for access. | `127.0.0.1,::1` |
+| `DEV_ADMIN_USER` | Username used by admin-like components that need local credential-gated access (currently `/dev-admin`). | empty |
+| `DEV_ADMIN_PASSWORD` | Password used by admin-like components that need local credential-gated access (currently `/dev-admin`). | empty |
+| `DEV_ADMIN_LOCAL_ONLY` | If `true`, admin-like components only allow loopback IPs. | `true` |
+| `DEV_ADMIN_ALLOWED_IPS` | Comma-separated IPs/CIDRs allowed for admin-like components. | `127.0.0.1,::1` |
+
+Notes:
+
+- The `DEV_ADMIN_*` prefix comes from the current `cmp_7050_dev_admin` implementation, but these settings are intended as a reusable baseline for other restricted admin components.
+- If another admin component is added, it can reuse this same model or define its own dedicated env names depending on isolation requirements.
 
 ### Rate Limiting
 

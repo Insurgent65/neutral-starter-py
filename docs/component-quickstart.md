@@ -18,6 +18,10 @@ Then update identifiers:
 
 - `manifest.json`: set a new `uuid`, `name`, and `route`.
 - `schema.json`: remove example-specific data you do not need.
+- Optional: create a local `custom.json` for ad-hoc overrides, or store centralized overrides in `config/config.db` table `custom` using:
+  - `comp_uuid` = component UUID
+  - `value_json` = JSON payload with `custom.json` shape (`manifest` and/or `schema`)
+  - `enabled` = `1` to apply override
 
 `uuid` should follow `name_random` format (example: `dashboard_8x90s`) and be unique.
 

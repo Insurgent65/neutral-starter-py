@@ -16,7 +16,7 @@ This starter is in active development.
 *   **Flask application factory** with component-driven routing and blueprint registration.
 *   **Modular component architecture** in `src/component` (manifest, schema, routes, templates, static assets).
 *   **Neutral TS templating (NTPL)** with snippet composition and schema-driven data.
-*   **Override model** using `custom.json` for local, per-component customization.
+*   **Override model** using `custom.json` and optional `config/config.db` (`custom` table) for per-component customization.
 *   **Security defaults**: CSP, host allow-list validation, trusted proxy header guard, and security headers.
 *   **Abuse protection**: form/session token flows and request rate limiting via Flask-Limiter.
 *   **PWA support**: service worker, offline page, and web manifest component.

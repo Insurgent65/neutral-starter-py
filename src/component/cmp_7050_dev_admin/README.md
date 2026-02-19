@@ -37,6 +37,8 @@ Access is protected by **all** these checks:
 - `DEV_ADMIN_USER`
 - `DEV_ADMIN_PASSWORD`
 
+These variable names are currently tied to this component prefix, but they are documented as a reusable security baseline for future admin components.
+
 3. Session login:
 - After successful login, session key `DEV_ADMIN_AUTH` is set.
 4. CSRF protection:

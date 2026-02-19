@@ -6,6 +6,7 @@
 
 Key features include:
 - **Component-Based Architecture**: Everything is isolated and modular, allowing for easy extension and overrides.
+- **Layered Component Overrides**: Per-component overrides can come from `custom.json` and optional centralized entries in `config/config.db` (`custom` table).
 - **Declarative SQL**: Database queries are defined in JSON files, keeping the Python codebase clean and ensuring database portability.
 - **Security-First Design**: Built-in CSRF protection (UTOKEN/LTOKEN), secure-by-default templating, and strict Content Security Policy (CSP) integration.
 - **Modular Frontend**: Powerful snippet-based rendering system for dynamic route content.
