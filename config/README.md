@@ -109,6 +109,15 @@ TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128,10.0.0.0/8
 |----------|-------------|---------|
 | `CONFIG_DB_PATH` | Path to the SQLite config database used for central overrides. | `../config/config.db` |
 
+### Dev Admin
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DEV_ADMIN_USER` | Username for `/dev-admin` access. | empty |
+| `DEV_ADMIN_PASSWORD` | Password for `/dev-admin` access. | empty |
+| `DEV_ADMIN_LOCAL_ONLY` | If `true`, only loopback IPs can access `/dev-admin`. | `true` |
+| `DEV_ADMIN_ALLOWED_IPS` | Comma-separated IPs/CIDRs additionally required for access. | `127.0.0.1,::1` |
+
 ### Rate Limiting
 
 | Variable | Description | Default |

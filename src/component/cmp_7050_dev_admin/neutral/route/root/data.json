@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Dev Admin",
+                "description": "Restricted dev admin for config.db custom overrides",
+                "h1": "Dev Admin"
+            }
+        }
+    }
+}

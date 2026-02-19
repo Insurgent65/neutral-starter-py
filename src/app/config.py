@@ -62,6 +62,15 @@ class Config: # pylint: disable=too-few-public-methods
         config.get('CONFIG_DB_PATH', '')
         or os.path.join(BASE_DIR, "..", "config", "config.db")
     )
+    DEV_ADMIN_USER = (config.get('DEV_ADMIN_USER', '') or '').strip()
+    DEV_ADMIN_PASSWORD = config.get('DEV_ADMIN_PASSWORD', '') or ''
+    DEV_ADMIN_LOCAL_ONLY = _env_bool(config.get('DEV_ADMIN_LOCAL_ONLY'), True)
+    _dev_admin_allowed_ips_raw = (
+        config.get('DEV_ADMIN_ALLOWED_IPS', '127.0.0.1,::1') or ''
+    )
+    DEV_ADMIN_ALLOWED_IPS = [
+        item.strip() for item in _dev_admin_allowed_ips_raw.split(',') if item.strip()
+    ]
 
     LIMITER_STORAGE_URI = config.get('LIMITER_STORAGE_URI', 'memory://')
 
