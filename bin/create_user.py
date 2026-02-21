@@ -42,7 +42,34 @@ def _build_parser() -> argparse.ArgumentParser:
         default="{}",
         help="Optional JSON text stored in user profile properties.",
     )
+    parser.add_argument(
+        "--role",
+        action="append",
+        default=[],
+        help="Role code to assign after user creation. Can be repeated.",
+    )
+    parser.add_argument(
+        "--roles",
+        default="",
+        help="Comma-separated role codes to assign after user creation.",
+    )
     return parser
+
+
+def _parse_roles(args: argparse.Namespace) -> list[str]:
+    role_tokens = list(args.role or [])
+    if args.roles:
+        role_tokens.extend(args.roles.split(","))
+
+    seen = set()
+    roles = []
+    for token in role_tokens:
+        role_code = str(token).strip().lower()
+        if not role_code or role_code in seen:
+            continue
+        seen.add(role_code)
+        roles.append(role_code)
+    return roles
 
 
 def _validate_args(args: argparse.Namespace) -> None:
@@ -63,6 +90,13 @@ def _validate_args(args: argparse.Namespace) -> None:
             json.loads(args.properties)
         except json.JSONDecodeError as exc:
             raise ValueError("properties must be valid JSON text") from exc
+
+    role_pattern = re.compile(r"^[a-z0-9_-]{2,32}$")
+    for role_code in _parse_roles(args):
+        if not role_pattern.match(role_code):
+            raise ValueError(
+                f"invalid role code '{role_code}'. Use 2-32 chars: a-z, 0-9, _ or -"
+            )
 
 
 def main() -> int:
@@ -88,8 +122,30 @@ def main() -> int:
         "properties": args.properties.strip() or "{}",
     }
 
-    result = User().create(user_data)
+    user = User()
+    result = user.create(user_data)
     if not result.get("success"):
+        print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)
+        return 1
+
+    roles_requested = _parse_roles(args)
+    roles_assigned = []
+    roles_failed = []
+    for role_code in roles_requested:
+        if user.assign_role(result.get("userId"), role_code):
+            roles_assigned.append(role_code)
+        else:
+            roles_failed.append(role_code)
+
+    if roles_requested:
+        result["roles_requested"] = roles_requested
+        result["roles_assigned"] = roles_assigned
+
+    if roles_failed:
+        result["success"] = False
+        result["error"] = "ROLE_ASSIGNMENT_FAILED"
+        result["message"] = "User was created but one or more roles could not be assigned."
+        result["roles_failed"] = roles_failed
         print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)
         return 1
 

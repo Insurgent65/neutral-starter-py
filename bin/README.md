@@ -65,6 +65,34 @@ source .venv/bin/activate && python bin/bootstrap_db.py \
   --db-files-url sqlite:////tmp/neutral-install/files.db
 ```
 
+### `install.sh` (Linux/macOS)
+
+Instalador interactivo para instalación limpia desde tag del repositorio.
+
+Incluye:
+- listado de hasta 15 tags y selección de versión
+- selección de directorio destino
+- creación de `.venv` + instalación de `requirements.txt`
+- copia de `config/.env.example` a `config/.env` + generación de `SECRET_KEY`
+- `bootstrap_db.py`
+- creación obligatoria de usuario `dev` (solicita datos) y actualización de `DEV_ADMIN_*` en `.env`
+
+Uso remoto:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/FranBarInstance/neutral-starter-py/master/bin/install.sh | sh
+```
+
+### `install.ps1` (Windows PowerShell)
+
+Instalador interactivo equivalente para Windows.
+
+Uso remoto:
+
+```powershell
+powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr -useb https://raw.githubusercontent.com/FranBarInstance/neutral-starter-py/master/bin/install.ps1 | iex"
+```
+
 ## Convención para futuros scripts
 
 - Nombre: `snake_case.py` (ejemplo: `sync_data.py`).
