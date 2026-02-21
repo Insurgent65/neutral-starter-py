@@ -2,18 +2,11 @@
 
 Role-based administration panel for user management.
 
-## Route Prefix
-
-- `/admin`
-
 ## Routes
 
-- `/admin`
-  - Admin home.
-- `/admin/user`
-  - User administration.
-- `/admin/post`
-  - Placeholder for future post administration.
+- Admin home.
+- User administration.
+- Post administration (Placeholder for future post administration.
 
 ## Access Model
 
