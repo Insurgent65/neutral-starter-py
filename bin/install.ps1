@@ -211,6 +211,10 @@ Set-EnvValue -Path "config/.env" -Key "DEV_ADMIN_ALLOWED_IPS" -Value "127.0.0.1,
 Write-Host "DEV_ADMIN_* updated in config/.env"
 
 Write-Host "Installation completed."
+Write-Host "Important: first sign-in may require the PIN generated for the user."
+Write-Host "Keep the PIN shown in the create_user output."
+Write-Host "Admin route created: $adminRoute (src/component/cmp_7060_admin/custom.json)"
+Write-Host "Dev admin route created: $devAdminRoute (src/component/cmp_7050_dev_admin/custom.json)"
 Write-Host "Project directory: $installDir"
 Write-Host "Run with:"
 Write-Host "  .\.venv\Scripts\python.exe src\run.py"
