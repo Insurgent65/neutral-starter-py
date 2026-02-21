@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Admin Posts",
+                "description": "Posts administration placeholder",
+                "h1": "Posts"
+            }
+        }
+    }
+}

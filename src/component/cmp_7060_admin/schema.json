@@ -1,0 +1,58 @@
+{
+    "inherit": {
+        "locale": {
+            "trans": {
+                "es": {
+                    "Admin": "Administración",
+                    "Users": "Usuarios",
+                    "Posts": "Publicaciones"
+                },
+                "fr": {
+                    "Admin": "Administration",
+                    "Users": "Utilisateurs",
+                    "Posts": "Publications"
+                },
+                "de": {
+                    "Admin": "Verwaltung",
+                    "Users": "Benutzer",
+                    "Posts": "Beiträge"
+                }
+            }
+        },
+        "data": {
+            "drawer": {
+                "menu": {
+                    "session:true": {
+                        "admin": {
+                            "name": "Admin",
+                            "tabs": "admin",
+                            "icon": "x-icon-setting"
+                        }
+                    }
+                }
+            },
+            "menu": {
+                "session:true": {
+                    "admin": {
+                        "admin-home": {
+                            "text": "Admin",
+                            "link": "[:;data->admin_0yt2sa->manifest->route:]",
+                            "icon": "x-icon-setting"
+                        },
+                        "admin-users": {
+                            "text": "Users",
+                            "link": "[:;data->admin_0yt2sa->manifest->route:]/user",
+                            "icon": "x-icon-user"
+                        },
+                        "admin-posts": {
+                            "text": "Posts",
+                            "link": "[:;data->admin_0yt2sa->manifest->route:]/post",
+                            "icon": "x-icon-edit"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "data": {}
+}

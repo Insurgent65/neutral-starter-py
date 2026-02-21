@@ -1,0 +1,7 @@
+{
+    "uuid": "admin_0yt2sa",
+    "name": "Admin",
+    "description": "Role-based admin panel for user operations",
+    "version": "1.0.0",
+    "route": "/admin"
+}

@@ -1,0 +1,205 @@
+{:data; #/data.json :}
+
+{:snip; current:template:body-main-content >>
+    <div class="{:;local::current->theme->class->container:} mb-3">
+        {:*  <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="m-0">{:trans; Users :}</h3>
+            <a class="btn btn-sm btn-outline-secondary" href="{:;admin_0yt2sa->manifest->route:}">{:trans; Admin :}</a>
+        </div>  *:}
+
+        {:filled; admin_user->error >>
+            <div class="alert alert-danger">{:&;admin_user->error:}</div>
+        :}
+        {:filled; admin_user->message >>
+            <div class="alert alert-success">{:&;admin_user->message:}</div>
+        :}
+
+        <form method="get" class="card card-body mb-4">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-lg-3">
+                    <label class="form-label" for="admin-search">{:trans; Search userId or login hash :}</label>
+                    <input id="admin-search" class="form-control" name="search" value="{:&;admin_user->search:}" placeholder="123... or hash...">
+                </div>
+                <div class="col-12 col-lg-2">
+                    <label class="form-label" for="admin-role-filter">{:trans; Role filter :}</label>
+                    <select id="admin-role-filter" class="form-select" name="role_filter">
+                        <option value="">{:trans; All roles :}</option>
+                        {:each; admin_user->roles_available rk rcode >>
+                            <option value="{:&;rcode:}"{:same; /{:;admin_user->role_filter:}/{:&;rcode:}/ >> selected :}>{:&;rcode:}</option>
+                        :}
+                    </select>
+                </div>
+                <div class="col-12 col-lg-3">
+                    <label class="form-label" for="admin-disabled-filter">{:trans; Disabled filter :}</label>
+                    <select id="admin-disabled-filter" class="form-select" name="disabled_filter">
+                        <option value="">{:trans; All disabled states :}</option>
+                        {:each; admin_user->disabled_options dk drow >>
+                            <option value="{:&;drow->code:}"{:same; /{:;admin_user->disabled_filter:}/{:&;drow->code:}/ >> selected :}>{:&;drow->name:} ({:&;drow->code:})</option>
+                        :}
+                    </select>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <label class="form-label" for="admin-order">{:trans; Order by :}</label>
+                    <select id="admin-order" class="form-select" name="order">
+                        <option value="created"{:same; /{:;admin_user->order:}/created/ >> selected :}>{:trans; Created date :}</option>
+                        <option value="modified"{:same; /{:;admin_user->order:}/modified/ >> selected :}>{:trans; Modified date :}</option>
+                        <option value="role_date"{:same; /{:;admin_user->order:}/role_date/ >> selected :}>{:trans; Role date :}</option>
+                        <option value="disabled_created_date"{:same; /{:;admin_user->order:}/disabled_created_date/ >> selected :}>{:trans; Disabled created date :}</option>
+                        <option value="disabled_modified_date"{:same; /{:;admin_user->order:}/disabled_modified_date/ >> selected :}>{:trans; Disabled modified date :}</option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg-2 d-grid">
+                    <button class="btn btn-primary w-100" type="submit">{:trans; Apply filters :}</button>
+                </div>
+            </div>
+        </form>
+
+        <div>
+            {:each; admin_user->users idx user >>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-12 col-xl-4">
+                                <div class="h-100 p-2 -border rounded">
+                                    <div class="mb-2"><strong>{:trans; User ID :}</strong> <code class="text-break">{:&;user->userId:}</code></div>
+                                    {:bool; admin_user->can_full >>
+                                        <div class="mb-2">
+                                            <strong>{:trans; Roles :}</strong><br>
+                                            {:each; user->roles k role >>
+                                                <span class="badge text-bg-secondary me-1 mb-1">{:&;role:}</span>
+                                            :}
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong>{:trans; Disabled :}</strong><br>
+                                            {:each; user->disabled k item >>
+                                                <div class="small mb-1">
+                                                    <code>{:&;item->name:}</code>
+                                                    {:filled; item->description >>
+                                                        <span>- {:&;item->description:}</span>
+                                                    :}
+                                                </div>
+                                            :}
+                                        </div>
+                                    :}
+                                    {:!bool; admin_user->can_full >>
+                                        <div class="mb-2">
+                                            <strong>{:trans; Roles :}</strong><br>
+                                            {:each; user->roles k role >>
+                                                <span class="badge text-bg-secondary me-1 mb-1">{:&;role:}</span>
+                                            :}
+                                        </div>
+                                        <div class="mb-0">
+                                            <strong>{:trans; Disabled :}</strong><br>
+                                            {:each; user->disabled k item >>
+                                                <div class="small mb-1">
+                                                    <code>{:&;item->name:}</code>
+                                                    {:filled; item->description >>
+                                                        <span>- {:&;item->description:}</span>
+                                                    :}
+                                                </div>
+                                            :}
+                                        </div>
+                                    :}
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-4">
+                                <div class="h-100 p-2 -border rounded">
+                                    <div class="mb-1"><strong>{:trans; Created :}</strong> {:&;user->created_human:}</div>
+                                    <div class="mb-1"><strong>{:trans; Modified :}</strong> {:&;user->modified_human:}</div>
+                                    <div class="mb-0"><strong>{:trans; Last access :}</strong> {:&;user->lasttime_human:}</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-4">
+                                <div class="h-100 p-2 -border rounded">
+                                    {:bool; admin_user->can_full >>
+                                        <div class="mb-1"><strong>{:trans; Alias :}</strong> {:&;user->user_profile.alias:}</div>
+                                        <div class="mb-1"><strong>{:trans; Locale :}</strong> {:&;user->user_profile.locale:}</div>
+                                        <div class="mb-0"><strong>{:trans; Email :}</strong> {:&;user->user_email.email:}</div>
+                                    :}
+                                    {:!bool; admin_user->can_full >>
+                                        <div class="mb-1"><strong>{:trans; Alias :}</strong> {:&;user->user_profile.alias:}</div>
+                                        <div class="mb-0"><strong>{:trans; Locale :}</strong> {:&;user->user_profile.locale:}</div>
+                                    :}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        {:bool; admin_user->can_full >>
+                            <form method="post" class="mb-0">
+                                <input type="hidden" name="ltoken" value="{:&;admin_user->ltoken:}">
+                                <input type="hidden" name="search" value="{:&;admin_user->search:}">
+                                <input type="hidden" name="role_filter" value="{:&;admin_user->role_filter:}">
+                                <input type="hidden" name="disabled_filter" value="{:&;admin_user->disabled_filter:}">
+                                <input type="hidden" name="order" value="{:&;admin_user->order:}">
+                                <input type="hidden" name="user_id" value="{:&;user->userId:}">
+                                <div class="row g-2">
+                                    <div class="col-12 col-xl-4">
+                                        <div class="mb-0 p-2 -border rounded">
+                                            <select class="form-select form-select-sm mb-1" name="role_code">
+                                                <option value="">{:trans; Select role :}</option>
+                                                {:each; admin_user->roles_available rk rcode >>
+                                                    <option value="{:&;rcode:}">{:&;rcode:}</option>
+                                                :}
+                                            </select>
+                                            <div class="d-grid gap-1">
+                                                <button class="btn btn-sm btn-outline-primary" type="submit" name="action" value="assign-role">{:trans; Add role :}</button>
+                                                <button class="btn btn-sm btn-outline-danger" type="submit" name="action" value="remove-role">{:trans; Remove role :}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-xl-4">
+                                        <div class="mb-0 p-2 -border rounded">
+                                            <select class="form-select form-select-sm mb-1" name="reason">
+                                                <option value="">{:trans; Select disabled reason :}</option>
+                                                {:each; admin_user->disabled_options dk drow >>
+                                                    <option value="{:&;drow->code:}">{:&;drow->name:} ({:&;drow->code:})</option>
+                                                :}
+                                            </select>
+                                            <input class="form-control form-control-sm mb-1" name="description" placeholder="{:trans; description (optional) :}">
+                                            <div class="d-grid gap-1">
+                                                <button class="btn btn-sm btn-outline-warning" type="submit" name="action" value="set-disabled">{:trans; Set status :}</button>
+                                                <button class="btn btn-sm btn-outline-success" type="submit" name="action" value="remove-disabled">{:trans; Remove status :}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-xl-4">
+                                        <div class="mb-0 p-2 -border rounded">
+                                            <div class="small text-warning mb-1">{:trans; Extreme action. Prefer setting deleted disabled status. :}</div>
+                                            <input class="form-control form-control-sm mb-1" name="delete_confirm" placeholder="{:trans; Type DELETE to confirm :}">
+                                            <div class="d-grid">
+                                                <button class="btn btn-sm btn-danger" type="submit" name="action" value="delete-user">{:trans; Delete user :}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        :}
+                        {:!bool; admin_user->can_full >>
+                            <form method="post" class="mb-0">
+                                <input type="hidden" name="ltoken" value="{:&;admin_user->ltoken:}">
+                                <input type="hidden" name="search" value="{:&;admin_user->search:}">
+                                <input type="hidden" name="role_filter" value="{:&;admin_user->role_filter:}">
+                                <input type="hidden" name="disabled_filter" value="{:&;admin_user->disabled_filter:}">
+                                <input type="hidden" name="order" value="{:&;admin_user->order:}">
+                                <input type="hidden" name="user_id" value="{:&;user->userId:}">
+                                <div class="small mb-1">{:trans; Moderators can only change unvalidated and moderated status. :}</div>
+                                <select class="form-select form-select-sm mb-1" name="reason">
+                                    <option value="">{:trans; Select disabled reason :}</option>
+                                    <option value="{:;admin_user->reason_unvalidated:}">{:trans; unvalidated :}</option>
+                                    <option value="{:;admin_user->reason_moderated:}">{:trans; moderated :}</option>
+                                </select>
+                                <input class="form-control form-control-sm mb-1" name="description" placeholder="{:trans; required for moderated :}">
+                                <div class="d-grid gap-1">
+                                    <button class="btn btn-sm btn-outline-warning" type="submit" name="action" value="set-disabled">{:trans; Set status :}</button>
+                                    <button class="btn btn-sm btn-outline-success" type="submit" name="action" value="remove-disabled">{:trans; Remove status :}</button>
+                                </div>
+                            </form>
+                        :}
+                    </div>
+                </div>
+            :}
+        </div>
+    </div>
+:}
+{:^;:}

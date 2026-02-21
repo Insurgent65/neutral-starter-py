@@ -1,0 +1,19 @@
+{:data; #/data.json :}
+
+{:snip; current:template:body-main-content >>
+    <div class="container py-4">
+        <h3>{:trans; Admin :}</h3>
+        <p>{:trans; Roles in session: :} <code>{:&;admin_home->roles:}</code></p>
+
+        <div class="list-group">
+            <a class="list-group-item list-group-item-action" href="{:;admin_0yt2sa->manifest->route:}/user">
+                {:trans; Users :}
+            </a>
+            <a class="list-group-item list-group-item-action" href="{:;admin_0yt2sa->manifest->route:}/post">
+                {:trans; Posts :}
+            </a>
+        </div>
+    </div>
+:}
+
+{:^;:}

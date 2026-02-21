@@ -1,0 +1,8 @@
+
+{:+!eval;
+    {:;CURRENT_USER->roles->role_admin:}
+    {:;CURRENT_USER->roles->role_dev:}
+    {:;CURRENT_USER->roles->role_moderator:}
+    >>
+    {:!data; {:flg; require :} >> {:;admin_0yt2sa->path:}/access-false.json :}
+:}

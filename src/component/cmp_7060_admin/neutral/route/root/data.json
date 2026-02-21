@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Admin",
+                "description": "Administration area",
+                "h1": "Admin"
+            }
+        }
+    }
+}

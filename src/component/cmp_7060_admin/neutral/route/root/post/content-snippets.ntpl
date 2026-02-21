@@ -1,0 +1,9 @@
+{:data; #/data.json :}
+
+{:snip; current:template:body-main-content >>
+    <div class="container py-4">
+        <h3>{:trans; Posts :}</h3>
+        <p>{:trans; Placeholder for future post administration. :}</p>
+    </div>
+:}
+{:^;:}

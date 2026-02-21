@@ -1,0 +1,20 @@
+{
+    "data": {
+        "drawer": {
+            "menu": {
+                "session:true": {
+                    "admin": null
+                }
+            }
+        },
+        "menu": {
+            "session:true": {
+                "admin": {
+                    "admin-home": null,
+                    "admin-users": null,
+                    "admin-posts": null
+                }
+            }
+        }
+    }
+}

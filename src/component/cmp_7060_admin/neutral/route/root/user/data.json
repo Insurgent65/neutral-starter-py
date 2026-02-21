@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Admin Users",
+                "description": "User administration",
+                "h1": "Users"
+            }
+        }
+    }
+}
