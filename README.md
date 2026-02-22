@@ -81,7 +81,7 @@ Installer features:
 - Copies `config/.env.example` to `config/.env`.
 - Generates a random `SECRET_KEY`.
 - Generates randomized admin routes in:
-  - `src/component/cmp_7060_admin/custom.json` as `/admin-[random]`
+  - `src/component/cmp_7040_admin/custom.json` as `/admin-[random]`
   - `src/component/cmp_7050_dev_admin/custom.json` as `/dev-admin-[random]`
 - Randomized admin routes are generated during installation as an extra hardening measure against automated scraping/scanning of default admin URLs. This is not security by itself; core protection remains authentication/authorization and rate limiting.
 - Bootstraps databases with `bin/bootstrap_db.py`.

@@ -26,7 +26,7 @@ Automatic installers are provided for:
 - Copies `config/.env.example` to `config/.env`.
 - Generates random `SECRET_KEY`.
 - Generates randomized admin routes:
-  - `src/component/cmp_7060_admin/custom.json` -> `/admin-[random]`
+  - `src/component/cmp_7040_admin/custom.json` -> `/admin-[random]`
   - `src/component/cmp_7050_dev_admin/custom.json` -> `/dev-admin-[random]`
 - Runs DB bootstrap (`bin/bootstrap_db.py`).
 - Creates a `dev` role user with `bin/create_user.py`.
@@ -92,7 +92,7 @@ Set `SECRET_KEY` to a strong random value before running in non-local environmen
 
 Create:
 
-- `src/component/cmp_7060_admin/custom.json`
+- `src/component/cmp_7040_admin/custom.json`
 - `src/component/cmp_7050_dev_admin/custom.json`
 
 Example:

@@ -141,8 +141,8 @@ DEV_ADMIN_SUFFIX="$(printf "%s\n" "$ROUTE_SUFFIXES" | sed -n '2p')"
 ADMIN_ROUTE="/admin-$ADMIN_SUFFIX"
 DEV_ADMIN_ROUTE="/dev-admin-$DEV_ADMIN_SUFFIX"
 
-mkdir -p src/component/cmp_7060_admin src/component/cmp_7050_dev_admin
-cat > src/component/cmp_7060_admin/custom.json <<EOF
+mkdir -p src/component/cmp_7040_admin src/component/cmp_7050_dev_admin
+cat > src/component/cmp_7040_admin/custom.json <<EOF
 {
   "manifest": {
     "route": "$ADMIN_ROUTE"
@@ -188,7 +188,7 @@ echo "DEV_ADMIN_* updated in config/.env"
 echo "Installation completed."
 echo "Important: first sign-in may require the PIN generated for the user."
 echo "Keep the PIN shown in the create_user output."
-echo "Admin route created: $ADMIN_ROUTE (src/component/cmp_7060_admin/custom.json)"
+echo "Admin route created: $ADMIN_ROUTE (src/component/cmp_7040_admin/custom.json)"
 echo "Dev admin route created: $DEV_ADMIN_ROUTE (src/component/cmp_7050_dev_admin/custom.json)"
 echo "Project directory: $INSTALL_DIR"
 echo "Run with:"

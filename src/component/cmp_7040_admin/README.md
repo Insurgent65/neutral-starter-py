@@ -86,20 +86,20 @@ For `user_disabled` records:
 ## Key Files
 
 - Backend route/controller:
-  - `src/component/cmp_7060_admin/route/routes.py`
+  - `src/component/cmp_7040_admin/route/routes.py`
 - UI template:
-  - `src/component/cmp_7060_admin/neutral/route/root/user/content-snippets.ntpl`
+  - `src/component/cmp_7040_admin/neutral/route/root/user/content-snippets.ntpl`
 - SQL model queries:
   - `src/model/user.json`
 - User service helpers:
   - `src/core/user.py`
 - Component tests:
-  - `src/component/cmp_7060_admin/tests/test_admin_component.py`
+  - `src/component/cmp_7040_admin/tests/test_admin_component.py`
 
 ## Tests
 
 Run:
 
 ```bash
-source .venv/bin/activate && pytest -q src/component/cmp_7060_admin
+source .venv/bin/activate && pytest -q src/component/cmp_7040_admin
 ```

@@ -75,7 +75,7 @@ Incluye:
 - creación de `.venv` + instalación de `requirements.txt`
 - copia de `config/.env.example` a `config/.env` + generación de `SECRET_KEY`
 - generación automática de rutas aleatorias en:
-  - `src/component/cmp_7060_admin/custom.json` -> `/admin-[aleatorio]`
+  - `src/component/cmp_7040_admin/custom.json` -> `/admin-[aleatorio]`
   - `src/component/cmp_7050_dev_admin/custom.json` -> `/dev-admin-[aleatorio]`
 - `bootstrap_db.py`
 - creación obligatoria de usuario `dev` (solicita datos) y actualización de `DEV_ADMIN_*` en `.env`

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 
-_TEST_COMPONENT = "cmp_7060_admin"
+_TEST_COMPONENT = "cmp_7040_admin"
 _BP_NAME = f"bp_{_TEST_COMPONENT}"
 
 

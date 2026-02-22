@@ -155,7 +155,7 @@ $devAdminSuffix = (& $venvPython -c "import secrets; print(secrets.token_hex(6))
 $adminRoute = "/admin-$adminSuffix"
 $devAdminRoute = "/dev-admin-$devAdminSuffix"
 
-$adminCustomPath = "src/component/cmp_7060_admin/custom.json"
+$adminCustomPath = "src/component/cmp_7040_admin/custom.json"
 $devAdminCustomPath = "src/component/cmp_7050_dev_admin/custom.json"
 New-Item -ItemType Directory -Path (Split-Path -Parent $adminCustomPath) -Force | Out-Null
 New-Item -ItemType Directory -Path (Split-Path -Parent $devAdminCustomPath) -Force | Out-Null
@@ -213,7 +213,7 @@ Write-Host "DEV_ADMIN_* updated in config/.env"
 Write-Host "Installation completed."
 Write-Host "Important: first sign-in may require the PIN generated for the user."
 Write-Host "Keep the PIN shown in the create_user output."
-Write-Host "Admin route created: $adminRoute (src/component/cmp_7060_admin/custom.json)"
+Write-Host "Admin route created: $adminRoute (src/component/cmp_7040_admin/custom.json)"
 Write-Host "Dev admin route created: $devAdminRoute (src/component/cmp_7050_dev_admin/custom.json)"
 Write-Host "Project directory: $installDir"
 Write-Host "Run with:"
