@@ -1,5 +1,11 @@
 {:* Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE) *:}
 
+
+{:!bool; dev_admin->auth_ok >>
+    {:exit; 401 :}
+:}
+
+
 {:*
     Disable carousel
     ----------------
