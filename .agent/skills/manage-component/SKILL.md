@@ -21,7 +21,7 @@ If you need additional information for a specific case:
 - Use `view_file` on `docs/model.md` for database interaction patterns.
 
 
-## 1. Directory Structure
+## Directory Structure
 
 Create a new directory in `src/component/` starting with `cmp_` followed by a number and name.
 
@@ -33,7 +33,7 @@ Example: `src/component/cmp_7000_hellocomp`
 mkdir -p src/component/cmp_NNNN_name
 ```
 
-## 2. Manifest and Configuration
+## Manifest and Configuration
 
 ### manifest.json
 Create `manifest.json` with the component metadata.
@@ -126,7 +126,7 @@ This avoids mixing initialization-time schema directives with runtime template e
 - Folder names can change (for example `cmp_7000_hellocomp`), while UUID is the stable identity (for example `hellocomp_0yt2sa`).
 - When describing links, settings, or cross-component references, use UUID-based wording.
 
-## 3. Python Initialization
+## Python Initialization
 
 ### __init__.py
 Initialize the component. This is optional, only if you need to do something on component initialization.
@@ -136,7 +136,7 @@ def init_component(component, component_schema, _schema):
     pass
 ```
 
-## 4. Backend Routes
+## Backend Routes
 
 ### route/__init__.py
 Initialize the Blueprint.
@@ -166,7 +166,14 @@ def index(route) -> Response:
     return dispatch.view.render()
 ```
 
-## 5. Frontend Templates
+## Frontend Templates
+
+### BIF (Built-in Function) Structure
+
+```
+{:[modifiers]name; [flags] params >> [code] :}
+{:[modifiers]name; code :}
+```
 
 ### neutral/route/root/data.json
 Define route configuration and metadata.
@@ -204,7 +211,52 @@ Define the main content of the page using Neutral Templates (NTPL). It is not ne
 {:^;:}
 ```
 
-## 6. Implementation Checklist
+## BIF Quick Reference Table
+
+| BIF | Purpose |
+|-----|---------|
+| `{:;var:}` | Output variable |
+| `{:;local::var:}` | Output local variable |
+| `{:code; ... :}` | Code block |
+| `{:filled; v >> code :}` | Conditional (has content) |
+| `{:defined; v >> code :}` | Conditional (is defined) |
+| `{:bool; v >> code :}` | Conditional (is true) |
+| `{:each; arr k v >> code :}` | Loop through array |
+| `{:for; v 1..10 >> code :}` | For loop |
+| `{:include; file :}` | Include file |
+| `{:snippet; n >> code :}` | Define snippet |
+| `{:snippet; n :}` | Play snippet |
+| `{:trans; text :}` | Translate |
+| `{:cache; /t/ >> code :}` | Cache content |
+| `{:coalesce; ... :}` | First non-empty |
+| `{:join; /arr/sep/ :}` | Join array |
+| `{:same; /a/b/ >> code :}` | String comparison |
+| `{:contains; /h/n/ >> code :}` | Substring check |
+| `{:allow; list >> val :}` | Whitelist check |
+| `{:declare; name >> list :}` | Define whitelist |
+| `{:exit; status >> code :}` | HTTP status/exit |
+| `{:redirect; status >> url :}` | Redirect |
+| `{:fetch; |url|ev| >> code :}` | AJAX request |
+| `{:else; code :}` | Else condition |
+| `{:eval; c1 >> c2 :}` | Evaluate and output |
+| `{:param; n >> v :}` | Set parameter |
+| `{:moveto; tag >> code :}` | Move content to tag |
+| `{:date; format :}` | Output date |
+| `{:hash; text :}` | MD5 hash |
+| `{:rand; 1..10 :}` | Random number |
+| `{:sum; /a/b/ :}` | Sum values |
+| `{:replace; /f/t/ >> code :}` | String replace |
+| `{:count; ... :}` | Count (deprecated) |
+| `{:data; file.json :}` | Load local data |
+| `{:locale; file.json :}` | Load translations |
+| `{:debug; key :}` | Debug output |
+| `{:neutral; code :}` | No-parse output |
+| `{:obj; config :}` | Execute external script |
+| `{:;:}` | Unprintable (empty)
+
+Use `view_file` on `docs/templates-neutrats.md` for NTPL syntax reference.
+
+## Implementation Checklist
 
 1.  **Create Directory**: `src/component/cmp_NNNN_name`
 2.  **Manifest**: `src/component/cmp_NNNN_name/manifest.json` (mandatory)
@@ -216,5 +268,5 @@ Define the main content of the page using Neutral Templates (NTPL). It is not ne
 8.  **Template Content**: `src/component/cmp_NNNN_name/neutral/route/root/content-snippets.ntpl`
 9.  **Static Files**: `src/component/cmp_NNNN_name/static/` (if needed)
 
-## 7. Python code quality
+## Python code quality
 To finish, use `pylint` to check for errors and warnings in all python files. Running pylint in `venv`
