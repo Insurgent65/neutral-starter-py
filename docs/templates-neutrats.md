@@ -7,6 +7,7 @@ Neutral Template System is a safe, modular, language-agnostic template engine bu
 This is a summary for the context of AI; the full documentation is here: [Neutral TS Doc](https://franbarinstance.github.io/neutralts-docs/docs/neutralts/)
 
 ### Template File Example
+
 ```
 {:*
     comment
@@ -32,418 +33,234 @@ This is a summary for the context of AI; the full documentation is here: [Neutra
 </html>
 ```
 
-## Core Syntax
+### **NTPL File Fundamentals**
 
-### BIF (Built-in Function) Structure
+**File Extension:** `.ntpl` (Neutral Template)
+
+**Core Philosophy:**
+- **Safe by design**: Variables are NOT evaluated by default (prevents injection attacks)
+- **Language-agnostic**: Same templates work across Python, Rust, PHP, Node.js, Go
+- **Modular**: Component-based architecture with snippet reusability
+- **Security-first**: Built-in XSS protection and context-aware escaping
+
+---
+
+### **BIF (Built-in Function) Structure**
+
+All NTPL functionality uses BIFs with this exact syntax:
 
 ```
 {:[modifiers]name; [flags] params >> code :}
 ```
 
-Structure breakdown:
+**Anatomy:**
 ```
 {:[modifiers]name; [flags] params >> code :}
  │            │  │     │       │      │   │
- │            │  │     │       │      │   └─ Close BIF
- │            │  │     │       │      └─ Code block
- │            │  │     │       └─ Params/Code separator
- │            │  │     └─ Parameters
- │            │  └─ Name separator
- │            └─ BIF name
- └─ Open BIF
+ │            │  │     │       │      │   └─ Close BIF (always :})
+ │            │  │     │       │      └─ Code block (content to render)
+ │            │  │     │       └─ Params/Code separator (>>)
+ │            │  │     └─ Parameters (variables, files, conditions)
+ │            │  └─ Name separator (;)
+ │            └─ BIF name (snippet, trans, include, etc.)
+ └─ Open BIF ({:)
 ```
 
-### Modifiers
-
-| Modifier | Symbol | Description |
-|----------|--------|-------------|
-| Upline | `^` | Eliminates previous whitespace |
+**Modifiers (prefix before name):**
+| Modifier | Symbol | Purpose |
+|----------|--------|---------|
+| Upline | `^` | Eliminates preceding whitespace |
 | Not | `!` | Negates condition or changes behavior |
-| Scope | `+` | Adds scope to current level |
+| Scope | `+` | Promotes definition to parent/current scope |
 | Filter | `&` | Escapes HTML special characters |
 
-Modifiers can be combined: `{:^!defined; varname >> ... :}`
-
-## Variables
-
-### Variable `schema.data` (Immutable)
-```
-{:;varname:}           # Simple variable
-{:;array->key:}        # Array/object access
-{:;array->{:;key:}:}   # Dynamic evaluation
+**Example with modifiers:**
+```ntpl
+{:^!filled; varname >> content :}  {:* No whitespace, negated, filtered *:}
 ```
 
-### Local Variable `schema.inherit.data` (Mutable)
-```
-{:;local::varname:}           # Simple variable
-{:;local::array->key:}        # Array/object access
-{:;local::array->{:;key:}:}   # Dynamic evaluation
-```
+---
 
-## Schema Structure
-```json
-{
-  "config": {
-    "comments": "remove",
-    "cache_prefix": "neutral-cache",
-    "cache_dir": "",
-    "cache_on_post": false,
-    "cache_on_get": true,
-    "cache_on_cookies": true,
-    "cache_disable": false,
-    "filter_all": false,
-    "disable_js": false,
-    "debug_expire": 3600,
-    "debug_file": ""
-  },
-  "inherit": {
-    "locale": {
-      "current": "en",
-      "trans": {
-        "en": {
-          "Hello": "Hello"
-        },
-        "es": {
-          "Hello": "Hola"
-        }
-      }
-    },
-    "data": {
-      "my_var": "value"
-    }
-  },
-  "data": {
-    "CONTEXT": {
-      "ROUTE": "",
-      "HOST": "",
-      "GET": {},
-      "POST": {},
-      "HEADERS": {},
-      "FILES": {},
-      "COOKIES": {},
-      "SESSION": {},
-      "ENV": {}
-    },
-    "my_var": "value",
-    "my_obj": {
-      "key": "value"
-    }
-  }
-}
-```
+### **Comments**
 
-## Unprintable — `{:;:}`
-Outputs empty string. Use `{:^;:}` to eliminate whitespace, or `{:;:}` to preserve spaces.
-
-## Control Flow BIFs
-
-### Conditionals
-```
-{:filled; varname >> content :}                  # If variable has content
-{:!filled; varname >> content :}                 # If variable is empty
-{:defined; varname >> content :}                 # If variable is defined
-{:!defined; varname >> content :}                # If variable is undefined
-{:bool; varname >> content :}                    # If variable is true
-{:!bool; varname >> content :}                   # If variable is false
-{:same; /a/b/ >> content :}                      # If a equals b
-{:!same; /a/b/ >> content :}                     # If a not equals b
-{:contains; /haystack/needle/ >> content :}      # If contains substring
-{:!contains; /haystack/needle/ >> content :}     # If not contains
-```
-
-### Iteration
-```
-{:each; array key value >>
-    {:;key:} = {:;value:}
-:}
-
-{:for; var 1..10 >>
-    {:;var:}
-:}
-```
-
-### Else Block
-Evaluate whether the expression produces an empty block, not the Boolean expression
-```
-{:;varname:}{:else; shown if empty :}
-{:filled; varname >> content :}{:else; alternative :}
-```
-
-## Content BIFs
-
-### Variable Output
-```
-{:;varname:}           # Output variable
-{:^;varname:}          # Output without preceding whitespace
-{:&;varname:}          # Output with HTML escaping
-{:!;varname:}          # Output without filtering
-```
-
-### Code Block
-```
-{:code; content :}                          # Basic code block
-{:code; {:flg; safe :} >> content :}        # Safe mode (no parsing)
-{:code; {:flg; noparse :} >> content :}     # No parsing
-{:code; {:flg; encode_tags :} >> content :} # Encode HTML tags
-```
-
-### Include
-```
-{:include; file.ntpl :}                              # Include template
-{:include; {:flg; require :} >> file.ntpl :}         # Required include
-{:include; {:flg; noparse :} >> file.css :}          # Include without parsing
-{:include; {:flg; safe :} >> file.txt :}             # Safe include
-{:include; #/relative/path.ntpl :}                   # Relative to current file
-{:include; anything-{:;varname:} :}                  # Dynamic include
-{:include; {:;varname:} :}                           # Dynamic GET ERROR use allow
-```
-
-### Snippets
-```
-{:snippet; name >> content :}   # Define snippet
-{:snippet; name :}              # Use snippet
-{:snip; name >> content :}      # Alias for snippet
-```
-
-## Safety Features
-
-### Context Variables
-User-provided data should be placed in `CONTEXT`:
-```json
-{
-    "data": {
-        "CONTEXT": {
-            "GET": {},
-            "POST": {},
-            "COOKIES": {},
-            "ENV": {}
-        }
-    }
-}
-```
-
-All `CONTEXT` variables are automatically HTML-escaped.
-
-### Security
-- Variables are **not evaluated** (template injection safe)
-- Complete variable evaluation requires `{:allow; ... :}`
-- Partial evaluation allowed: `{:; array->{:;key:} :}`
-- Templates cannot access data not in schema.
-- `CONTEXT` vars auto-escaped. `filter_all: true` escapes everything.
-
-### File Security
-```
-# Error - insecure:
-{:include; {:;varname:} :}
-
-# Secure - with allow:
-{:declare; valid-files >>
-    home.ntpl
-    login.ntpl
-:}
-{:include;
-    {:allow; valid-files >> {:;varname:} :}
-    {:else; error.ntpl :}
-:}
-```
-
-### Allow/Deny Lists
-```
-{:declare; allowed >>
-    word1
-    word2
-    *.ntpl
-:}
-{:allow; allowed >> {:;varname:} :}
-```
-
-Wildcards supported:
-- `.` - matches any character
-- `?` - matches exactly one character
-- `*` - matches zero or more characters
-
-## Advanced Features
-
-### Caching
-```
-{:cache; /300/ >> content :}           # Cache for 300 seconds
-{:cache; /300/custom-id/ >> content :} # Cache with custom ID
-{:!cache; content :}                   # Exclude from cache
-```
-
-### Translations
-```
-{:trans; Hello :}                       # Translate text
-{:!trans; Hello :}                      # Translate or empty
-{:locale; translations.json :}          # Load translations
-```
-
-Translation schema:
-```json
-{
-    "inherit": {
-        "locale": {
-            "current": "en",
-            "trans": {
-                "en": { "Hello": "Hello" },
-                "es": { "Hello": "Hola" }
-            }
-        }
-    }
-}
-```
-
-### Parameters
-```
-{:code;
-    {:param; name >> value :}   # Set parameter
-    {:param; name :}            # Get parameter
-    ...
-:}
-```
-
-### Coalesce
-```
-{:coalesce;
-    {:;var1:}
-    {:;var2:}
-    {:code; default :}
-:}
-```
-
-### Evaluation
-```
-{:eval; {:;varname:} >>
-    Content if not empty: {:;__eval__:}
-:}
-```
-
-## Scope & Inheritance
-- Definitions are block-scoped, inherited by children, recovered on exit.
-- `include` has block scope.
-- `+` modifier promotes definitions to current/parent scope.
-
-### Scope Modifier (`+`)
-By default, definitions have block scope. `+` extends to current level:
-```
-{:code;
-    {:include; snippet.ntpl :}
-    {:snippet; name :}     # Not available outside
-:}
-{:snippet; name :}         # Not available
-
-{:+code;
-    {:include; snippet.ntpl :}
-    {:snippet; name :}     # Available outside
-:}
-{:snippet; name :}         # Still available
-```
-
-## HTTP Features
-
-### Exit/Redirect
-```
-{:exit; 404 :}                    # Exit with status
-{:!exit; 302 :}                   # Set status, continue
-{:exit; 301 >> /url :}            # Redirect
-{:redirect; 301 >> /url :}        # HTTP redirect
-{:redirect; js:reload:top :}      # JS redirect
-```
-
-### Fetch (AJAX)
-```
-{:fetch; |/url|auto| >> <div>loading...</div> :}
-{:fetch; |/url|click| >> <button>Load</button> :}
-{:fetch; |/url|form| >> ... :}
-```
-
-Events: `auto`, `none`, `click`, `visible`, `form`
-
-## Comments
-```
-{:* single line comment *:}
+**Syntax:**
+```ntpl
+{:* Single line comment *:}
 
 {:*
-    multi-line
-    comment
+    Multi-line comment
+    ------------------
+    Can span multiple lines
 *:}
 
-{:; varname {:* inline comment *:} :}
+{:* Inline comment in BIF :}
+{:;varname {:* get user name *:} :}
+
+{:*
+    Nested comments are supported
+    {:* Inner comment *:}
+    {:*
+        Multiple levels
+        {:* Deep nesting *:}
+    *:}
+*:}
 ```
 
-## Configuration Options
+---
 
-```json
-{
-    "config": {
-        "comments": "remove",
-        "cache_prefix": "neutral-cache",
-        "cache_dir": "",
-        "cache_on_post": false,
-        "cache_on_get": true,
-        "cache_on_cookies": true,
-        "cache_disable": false,
-        "filter_all": false,
-        "disable_js": false,
-        "debug_expire": 3600,
-        "debug_file": ""
-    }
-}
+### **Variable System**
+
+#### **Immutable Data (`schema.data`)**
+Accessed via `{:;varname:}` - set by Python/backend, cannot be overridden by templates.
+
+```ntpl
+{:;site_name:}                    {:* Simple variable *:}
+{:;user->email:}                   {:* Object property *:}
+{:;array->{:;index:}:}              {:* Dynamic array access *:}
 ```
 
-## Quick Reference Table
+#### **Local/Mutable Data (`schema.inherit.data`)**
+Accessed via `{:;local::varname:}` - can be overridden by templates at runtime.
 
-| BIF | Purpose |
-|-----|---------|
-| `{:;var:}` | Output variable |
-| `{:code; ... :}` | Code block |
-| `{:filled; v >> c :}` | Conditional (has content) |
-| `{:defined; v >> c :}` | Conditional (is defined) |
-| `{:bool; v >> c :}` | Conditional (is true) |
-| `{:each; arr k v >> c :}` | Loop through array |
-| `{:for; v 1..10 >> c :}` | For loop |
-| `{:include; file :}` | Include file |
-| `{:snippet; n >> c :}` | Define snippet |
-| `{:snippet; n :}` | Play snippet |
-| `{:trans; text :}` | Translate |
-| `{:cache; /t/ >> c :}` | Cache content |
-| `{:coalesce; ... :}` | First non-empty |
-| `{:join; /arr/sep/ :}` | Join array |
-| `{:same; /a/b/ >> c :}` | String comparison |
-| `{:contains; /h/n/ >> c :}` | Substring check |
-| `{:allow; list >> val :}` | Whitelist check |
-| `{:declare; name >> list :}` | Define whitelist |
-| `{:exit; code :}` | HTTP status/exit |
-| `{:redirect; code >> url :}` | Redirect |
-| `{:fetch; |url|ev| >> c :}` | AJAX request |
-| `{:else; c :}` | Else condition |
-| `{:eval; c1 >> c2 :}` | Evaluate and output |
-| `{:param; n >> v :}` | Set parameter |
-| `{:moveto; tag >> c :}` | Move content to tag |
-| `{:date; format :}` | Output date |
-| `{:hash; text :}` | MD5 hash |
-| `{:rand; 1..10 :}` | Random number |
-| `{:sum; /a/b/ :}` | Sum values |
-| `{:replace; /f/t/ >> c :}` | String replace |
-| `{:count; ... :}` | Count (deprecated) |
-| `{:data; file.json :}` | Load local data |
-| `{:locale; file.json :}` | Load translations |
-| `{:debug; key :}` | Debug output |
-| `{:neutral; c :}` | No-parse output |
-| `{:obj; config :}` | Execute external script |
-| `{:; :}` | Unprintable (empty) |
+```ntpl
+{:;local::current->route->title:}
+{:;local::user->name:}
+```
 
-## Security Best Practices
+#### **CONTEXT (User Input)**
+All user-provided data (GET, POST, COOKIES, ENV) is auto-escaped and stored in CONTEXT:
 
-1. **Never trust context data** (GET, POST, COOKIES, ENV)
-2. **Use `CONTEXT`** for all user-provided data
-3. **Use `{:allow; ... :}`** for dynamic file inclusion
-4. **Use `filter_all: true`** for maximum safety
-5. **Validate variables** with `declare`/`allow` before evaluation
-6. **Remove debug** BIFs before production
-7. **Both application and templates** should implement security
+```ntpl
+{:;CONTEXT->POST->username:}        {:* Auto-escaped POST data *:}
+{:;CONTEXT->GET->id:}                {:* Auto-escaped GET parameter *:}
+{:;CONTEXT->SESSION->userId:}         {:* Session data *:}
+{:;CONTEXT->HEADERS->User-Agent:}    {:* Request headers *:}
+```
 
-## Truth Table
+**Security Rule:** Never use `{:!;CONTEXT->...:}` (unfiltered) unless absolutely necessary.
+
+---
+
+### **Core BIF Reference**
+
+#### **Output & Variables**
+
+| BIF | Syntax | Purpose |
+|-----|--------|---------|
+| Variable | `{:;varname:}` | Output immutable data |
+| Local Variable | `{:;local::varname:}` | Output mutable local data |
+| Unprintable | `{:;:}` or `{:^;:}` | Output empty string (whitespace control) |
+| Filtered Output | `{:&;varname:}` | HTML-escaped output |
+
+**Unprintable BIF details:**
+```ntpl
+{:* Basic unprintable - preserves spaces :}
+{:;:}
+
+{:* Upline unprintable - eliminates preceding whitespace :}
+{:^;:}
+
+{:* Usage examples :}
+|<pre>
+{:code;
+    {:^;:}    {:* Eliminates leading newline *:}
+    Hello
+    {:^;:}    {:* Eliminates trailing newline *:}
+:}
+</pre>|
+```
+
+#### **Conditionals**
+
+```ntpl
+{:* Check if variable has content (non-empty, non-null, defined) *:}
+{:filled; varname >>
+    <p>Has content: {:;varname:}</p>
+:}
+
+{:* Negated - check if empty or undefined *:}
+{:!filled; varname >>
+    <p>Variable is empty or undefined</p>
+:}
+
+{:* Check if variable is defined (exists, even if null/empty) *:}
+{:defined; varname >>
+    <p>Variable exists</p>
+:}
+
+{:* Check if NOT defined *:}
+{:!defined; varname >>
+    <p>Variable does not exist</p>
+:}
+
+{:* Boolean check - true values: true, non-zero, non-empty strings *:}
+{:bool; varname >>
+    <p>Truthy value</p>
+:}
+
+{:* Boolean negated *:}
+{:!bool; varname >>
+    <p>Falsy value</p>
+:}
+
+{:* String comparison - any delimiter works :}
+{:same; /{:;status:}/active/ >>
+    <p>Status is active</p>
+:}
+
+{:* Negated comparison *:}
+{:!same; /{:;status:}/active/ >>
+    <p>Status is not active</p>
+:}
+
+{:* Substring check *:}
+{:contains; /{:;text:}/search/ >>
+    <p>Contains "search"</p>
+:}
+
+{:* Negated contains *:}
+{:!contains; /{:;text:}/search/ >>
+    <p>Does not contain "search"</p>
+:}
+
+{:* Array check *:}
+{:array; varname >>
+    <p>Is an array/object</p>
+:}
+
+{:* Negated array check *:}
+{:!array; varname >>
+    <p>Is not an array</p>
+:}
+
+{:* Use else *:}
+{:filled; varname >>
+    <p>Has content: {:;varname:}</p>
+:}{:else;
+    <p>Variable is empty or undefined</p>
+:}
+
+```
+
+**Else blocks** (evaluate whether the PREVIOUS BIF produced output):
+```ntpl
+{:* Else evaluates if previous BIF output was empty *:}
+{:filled; varname >> <p>Has content</p> :}
+{:else; <p>Is empty</p> :}
+
+{:* Chain multiple else blocks *:}
+{:code;
+    {:;foo:}
+    {:;bar:}
+:}{:else;
+    foo and bar are empty
+:}{:else;
+    {:* This fires if previous else was empty (i.e., foo or bar had content) *:}
+    foo or bar has content
+:}
+```
+
+**Truth Table (from documentation):**
 | Variable | Value | filled | defined | bool | array |
 |----------|-------|--------|---------|------|-------|
 | true | true | ✅ | ✅ | ✅ | ❌ |
@@ -458,52 +275,841 @@ Events: `auto`, `none`, `click`, `visible`, `form`
 | [] | empty arr | ❌ | ✅ | ❌ | ✅ |
 | {...} | object | ✅ | ✅ | ✅ | ✅ |
 
-## Page Content Strategy
+#### **Iteration**
 
-The application uses a snippet-based architectural pattern to render dynamic route-specific content within a consistent global layout.
+```ntpl
+{:* Loop through array/object - each *:}
+{:each; users key user >>
+    <div class="user">
+        <span>{:;key:}</span>
+        <span>{:;user->name:}</span>
+        <span>{:;user->email:}</span>
+    </div>
+:}
 
-### Layout Orchestration (`index.ntpl`)
+{:* With upline modifier for clean output :}
+{:^each; items idx item >>
+    <li>{:;idx:}: {:;item:}</li>
+:}
 
-The entry point for rendering any page is typically `src/component/cmp_0200_template/neutral/layout/index.ntpl`. Its main functions are:
+{:* Numeric loop - for *:}
+{:for; i 1..10 >>
+    <span>{:;i:}</span>
+:}
 
-1.  **Global Includes**: It loads utility snippets, theme structures, and navigation components.
-2.  **Route Inclusion**: It dynamically includes the `content-snippets.ntpl` file corresponding to the current route:
-    ```ntpl
-    {:include; {:;CURRENT_NEUTRAL_ROUTE:}/{:;CURRENT_COMP_ROUTE:}/content-snippets.ntpl :}
-    ```
-3.  **Template Execution**: Depending on the request type (AJAX vs. standard), it loads the final rendering structure (`template.ntpl` or `template-ajax.ntpl`).
+{:* Reverse loop *:}
+{:for; i 10..1 >>
+    <span>{:;i:}</span>
+:}
 
-### The Base Template (`template.ntpl`)
-
-The `template.ntpl` file defines the semantic HTML5 skeleton. Instead of direct content, it uses **placeholders** (snippets) that are filled by the route-specific files:
-
-- `{:snip; current:template:page-h1 :}`: Renders the page title.
-- `{:snip; current:template:body-main-content :}`: Renders the primary page body.
-- `{:snip; current:template:body-lateral-bar :}`: Renders an optional sidebar.
-
-> [!IMPORTANT]
-> All default implementations for these snippets are located in `src/component/cmp_0200_template/neutral/layout/template-snippets.ntpl`. **Modifying this file directly is not recommended.** Instead, you should overwrite the desired snippet in your route's `content-snippets.ntpl` file to customize behavior for that specific route.
-
-### Route-Specific Dynamic (`content-snippets.ntpl`)
-
-Each route (e.g., `src/component/cmp_xxxx/neutral/route/root/test1/`) provides its own `content-snippets.ntpl`. This file is responsible for:
-
-1.  **Data Persistence**: Loading the local `data.json` to populate the `local::current` namespace.
-    ```ntpl
-    {:data; {:flg; require :} >> #/data.json :}
-    ```
-    *Example `data.json` for the global H1:*
-    ```json
-    { "data": { "current": { "route": { "h1": "My Visible Title" } } } }
-    ```
-2.  **Component Overrides**: Modifying or disabling global snippets (e.g., hiding the sidebar).
-    ```ntpl
-    {:snip; current:template:body-lateral-bar >> :}
-    ```
-3.  **Core Content**: Defining the final content for the main placeholder.
-    ```ntpl
-    {:snip; current:template:body-main-content >>
-        <p>Dynamic Content Here</p>
+{:* Nested iteration example *:}
+{:^each; array key val >>
+    {:array; val >>
+        {:;:}
+        {:;key:}:
+        {:^each; val key val >>
+            {:array; val >>
+                {:;:}
+                {:;key:}:
+                {:^each; val key val >>
+                    {:;:}
+                    {:;key:}={:;val:}
+                :}
+            :}{:else;
+                {:;:}
+                {:;key:}={:;val:}
+            :}
+        :}
+    :}{:else;
+        {:;:}
+        {:;key:}={:;val:}
     :}
-    ```
-4.  **Inclusion Force**: Always end with `{:^;:}` to ensure the include BIF detects success content.
+:}
+```
+
+#### **Snippets**
+
+Snippets are reusable code fragments in templates, similar to functions, that avoid repetition by allowing you to define a block (such as a form) once and use it across multiple templates. You can use `{:snippet;` or `{:snip;` interchangeably.
+
+```ntpl
+{:* Define a snippet (must be in file with "snippet" in name) *:}
+{:snip; user-card >>
+    <div class="card">
+        <h3>{:;local::user->name:}</h3>
+        <p>{:;local::user->bio:}</p>
+    </div>
+:}
+
+{:* Use the snippet *:}
+{:snip; user-card :}
+
+{:* Alternative syntax *:}
+{:snip; user-card :}
+
+{:* Snippet with static flag (parsed at definition time) *:}
+{:snip; {:flg; static :} user-card-static >>
+    {:;varname:}  {:* Evaluated when DEFINED, not when called *:}
+:}
+
+{:* Scope modifiers with snippets - + promotes to parent scope *:}
+{:+code;
+    {:include; snippet.ntpl :}
+    {:snip; name :}  {:* Available outside due to + *:}
+:}
+{:snip; name :}  {:* Works because of + above *:}
+```
+
+#### **Includes**
+
+```ntpl
+{:* Basic include *:}
+{:include; header.ntpl :}
+
+{:* Required include (errors if missing) *:}
+{:include; {:flg; require :} >> config.ntpl :}
+
+{:* Include without parsing (raw content) *:}
+{:include; {:flg; noparse :} >> styles.css :}
+
+{:* Safe include (encoded, no parsing) *:}
+{:include; {:flg; safe :} >> readme.txt :}
+
+{:* Relative to current file - # symbol *:}
+{:include; #/snippets.ntpl :}      {:* Same directory *:}
+{:include; #/../shared/nav.ntpl :} {:* Parent directory *:}
+
+{:* Dynamic include with allowlist (SECURITY CRITICAL) *:}
+{:declare; valid-pages >>
+    home.ntpl
+    about.ntpl
+    contact.ntpl
+:}
+{:include;
+    {:allow; valid-pages >> {:;page:} :}
+    {:else; error.ntpl :}
+:}
+
+{:* Prevent reparse with ! modifier *:}
+{:!include; already-parsed.ntpl :}
+```
+
+#### **Translations**
+
+```ntpl
+{:* Basic translation *:}
+{:trans; Hello World :}
+
+{:* Translation with fallback to empty *:}
+{:!trans; Hello World :}{:else; Default text :}
+
+{:* Reference-based translation *:}
+{:trans; ref:menu:home :}
+
+{:* Load locale file *:}
+{:locale; locale-en.json :}
+{:locale; {:flg; require :} >> #/locale-{:lang;:}.json :}
+
+{:* Prevent reload if already loaded *:}
+{:!locale; locale-es.json :}
+
+{:* Upline modifier for clean whitespace *:}
+{:^trans; Hello :}
+```
+
+**Locale file structure (`locale-es.json`):**
+```json
+{
+    "__comment_:trans": "This translation will be available for the entire Component",
+    "trans": {
+        "es": {
+            "Hello World": "Hola Mundo",
+            "ref:menu:home": "Inicio",
+            "Welcome to {:;site-name:}": "Bienvenido a {:;site-name:}"
+        }
+    }
+}
+```
+
+#### **Data Loading**
+
+```ntpl
+{:* Load local data from JSON *:}
+{:data; local-data.json :}
+
+{:* Inline data *:}
+{:data; {:flg; inline :} >>
+    {
+        "data": {
+            "items": ["one", "two", "three"]
+        }
+    }
+:}
+
+{:* Prevent reload *:}
+{:!data; already-loaded.json :}
+
+{:* Access loaded data via local:: *:}
+{:;local::items->0:}
+```
+
+#### **Caching**
+
+```ntpl
+{:* Cache block for 300 seconds *:}
+{:cache; /300/ >>
+    <div>{:;expensive-content:}</div>
+:}
+
+{:* Cache with custom ID added to auto-generated ID *:}
+{:cache; /300/my-custom-id/ >>
+    <div>Content</div>
+:}
+
+{:* Replace auto-generated ID completely (third param = 1/true) *:}
+{:cache; /300/my-id/1/ >>
+    <div>Content</div>
+:}
+
+{:* Exclude from cache (always fresh) *:}
+{:!cache;
+    <div>{:date; %H:%M:%S :}</div>  {:* Current time, not cached *:}
+:}
+
+{:* Nested caching *:}
+{:cache; /60/ >>
+    Outer cached content (60s)
+    {:cache; /300/ >>
+        Inner cached longer (300s)
+    :}
+    {:!cache;
+        Always fresh (not cached)
+    :}
+:}
+
+{:* Upline modifier *:}
+{:^cache; /60/ >> content :}
+```
+
+#### **Parameters**
+
+```ntpl
+{:* Set parameters within code block *:}
+{:code;
+    {:param; title >> Dashboard :}
+    {:param; user_count >> 42 :}
+
+    <h1>{:param; title :}</h1>
+    <span>{:param; user_count :} users</span>
+:}
+
+{:* Parameters have block scope and recover their value *:}
+{:code;
+    {:param; name >> 1 :}
+    {:code;
+        {:param; name >> 2 :}
+    :}
+    {:* "name" recovers value 1 here *:}
+    {:param; name :}  {:* Outputs 1 *:}
+:}
+```
+
+#### **AJAX/Fetch**
+
+```ntpl
+{:* Auto-fetch on page load (default) *:}
+{:fetch; |/api/data|auto| >>
+    <div class="loading">Loading...</div>
+:}
+
+{:* Or simply (auto is default) *:}
+{:fetch; "/api/data" >> <div>Loading...</div> :}
+
+{:* Click-triggered fetch *:}
+{:fetch; |/api/action|click| >>
+    <button>Load Data</button>
+:}
+
+{:* Visible-triggered fetch (intersection observer) *:}
+{:fetch; |/api/lazy|visible| >>
+    <div class="placeholder">Scroll to load</div>
+:}
+
+{:* Form submission via fetch *:}
+{:fetch; |/api/submit|form|form-wrapper|my-form-class|my-form-id| >>
+    <input type="text" name="username">
+    <button type="submit">Submit</button>
+:}
+
+{:* With wrapper ID for target container *:}
+{:fetch; |/api/content|auto|content-wrapper| >>
+    <div>Loading content...</div>
+:}
+
+{:* No event - manual trigger *:}
+{:fetch; |/api/manual|none| >> <div>Manual load</div> :}
+
+{:* Upline modifier *:}
+{:^fetch; |/url|auto| >> content :}
+```
+
+**HTTP Header:** All fetch requests set `requested-with-ajax: fetch`
+
+#### **Code Blocks**
+
+```ntpl
+{:* Basic code block (no action, just grouping) *:}
+{:code;
+    <div>Any content</div>
+    {:;variable:}
+:}
+
+{:* Safe mode - encode everything *:}
+{:code; {:flg; safe :} >>
+    <div>{:;untrusted:}</div>  {:* Will be encoded *:}
+:}
+
+{:* No parse - output raw BIF syntax *:}
+{:code; {:flg; noparse :} >>
+    <div>{:;not-parsed:}</div>  {:* Shows literal {:;not-parsed:} *:}
+:}
+
+{:* Encode HTML tags *:}
+{:code; {:flg; encode_tags :} >>
+    <div>HTML tags encoded</div>
+:}
+
+{:* Encode BIFs *:}
+{:code; {:flg; encode_bifs :} >>
+    <div>{:;bif:}</div>  {:* Shows &#123;:;bif:&#125; *:}
+:}
+
+{:* Encode tags after parsing *:}
+{:code; {:flg; encode_tags_after :} >>
+    {:include; file.ntpl :}  {:* Parsed, then encoded *:}
+:}
+
+{:* Upline modifier *:}
+{:^code; content :}
+
+{:* Scope modifier *:}
+{:+code; content :}
+```
+
+#### **Control Flow**
+
+```ntpl
+{:* Coalesce - first non-empty value *:}
+{:coalesce;
+    {:;option1:}
+    {:;option2:}
+    {:code; Default value :}
+:}
+
+{:* Evaluate and capture result *:}
+{:eval; {:;complex-expression:} >>
+    Result: {:;__eval__:}
+:}
+
+{:* Negated eval *:}
+{:!eval; {:;empty-var:} >>
+    Shown if empty
+:}
+
+{:* Exit with status code *:}
+{:exit; 404 :}                    {:* Stop, 404 error, content cleared *:}
+{:!exit; 302 :}                   {:* Set 302, continue execution *:}
+{:exit; 301 >> /new-url :}        {:* Redirect to URL *:}
+
+{:* Custom status codes (1000+ range for app-specific) *:}
+{:exit; 10404 >> not-found :}     {:* Custom 404-like code *:}
+
+{:* Redirect BIF *:}
+{:redirect; 301 >> /destination :}
+{:redirect; js:reload:top :}      {:* JS reload top window *:}
+{:redirect; js:reload:self :}     {:* JS reload current frame *:}
+{:redirect; js:redirect;top >> /url :}   {:* JS redirect top *:}
+{:redirect; js:redirect;self >> /url :}  {:* JS redirect self *:}
+
+{:* Upline modifiers *:}
+{:^coalesce; ... :}
+{:^eval; ... :}
+{:^exit; ... :}
+{:^redirect; ... :}
+```
+
+#### **Security BIFs**
+
+```ntpl
+{:* Declare allowlist - MUST be in snippet file *:}
+{:declare; allowed-templates >>
+    home.ntpl
+    about.ntpl
+    *.ntpl
+:}
+
+{:* Declare with wildcards *:}
+{:declare; languages >>
+    en
+    en-??
+    en_??
+    es
+    es-??
+    es_??
+:}
+
+{:* Check against allowlist *:}
+{:allow; allowed-templates >> {:;template:} :}
+
+{:* Negated - check if NOT in list *:}
+{:!allow; blocked-items >> {:;item:} :}
+
+{:* With flags *:}
+{:allow; {:flg; partial :} patterns >> {:;value:} :}    {:* Wildcard matching *:}
+{:allow; {:flg; casein :} patterns >> {:;value:} :}      {:* Case-insensitive *:}
+{:allow; {:flg; replace :} patterns >> {:;value:} :}   {:* Return matched pattern *:}
+{:allow; {:flg; partial casein replace :} p >> v :}     {:* Combined *:}
+
+{:* Upline modifier *:}
+{:^declare; ... :}
+{:^allow; ... :}
+```
+
+**Wildcard rules:**
+- `.` - matches any single character
+- `?` - matches exactly one character
+- `*` - matches zero or more characters
+
+#### **Utility BIFs**
+
+```ntpl
+{:* Date formatting *:}
+{:date; :}                        {:* Unix timestamp *:}
+{:date; %Y-%m-%d %H:%M:%S :}      {:* Formatted date UTC *:}
+
+{:* MD5 hash *:}
+{:hash; :}                        {:* Random hash *:}
+{:hash; text to hash :}           {:* Specific hash *:}
+
+{:* Random number *:}
+{:rand; :}                        {:* Random integer *:}
+{:rand; 1..100 :}                 {:* Range *:}
+
+{:* String join *:}
+{:join; |array|, | :}              {:* Join with comma *:}
+{:join; /array/ - /keys/ :}        {:* Join keys with " - " *:}
+
+{:* String replace *:}
+{:replace; /old/new/ >> text :}
+{:replace; ~ ~/~ >> path :}      {:* Replace / with ~ *:}
+
+{:* Sum *:}
+{:sum; /5/10/ :}                  {:* Outputs 15 *:}
+
+{:* Move content to HTML tag *:}
+{:moveto; </head >> <style>css</style> :}
+{:moveto; <body >> <script>js</script> :}   {:* Beginning of body *:}
+{:moveto; </body >> <script>js</script> :}  {:* End of body *:}
+
+{:* Count (DEPRECATED per docs) *:}
+{:count; ... :}  {:* Do not use *:}
+
+{:* Upline modifiers *:}
+{:^date; ... :}
+{:^hash; ... :}
+{:^rand; ... :}
+{:^join; ... :}
+{:^replace; ... :}
+{:^sum; ... :}
+{:^moveto; ... :}
+```
+
+#### **External Objects/Python**
+
+```ntpl
+{:* Execute Python script from JSON config *:}
+{:obj; #/obj/config.json :}
+
+{:* Inline configuration *:}
+{:obj;
+    {
+        "engine": "Python",
+        "file": "{:;component->path:}/src/script.py",
+        "schema": false,
+        "venv": "{:;VENV_DIR:}",
+        "params": {
+            "user_id": "{:;CONTEXT->SESSION->userId:}"
+        },
+        "callback": "main",
+        "template": ""
+    }
+:}
+
+{:* With inline template *:}
+{:obj;
+    {
+        "engine": "Python",
+        "file": "script.py",
+        "params": {"name": "World"}
+    }
+    >>
+    <div>{:;local::message:}</div>
+:}
+
+{:* Upline modifier *:}
+{:^obj; ... :}
+
+{:* Scope modifier *:}
+{:+obj; ... :}
+```
+
+**Object JSON structure:**
+```json
+{
+    "engine": "Python",
+    "file": "path/to/script.py",
+    "schema": false,
+    "venv": "/path/to/venv",
+    "params": {
+        "key": "value"
+    },
+    "callback": "main",
+    "template": "optional-template.ntpl"
+}
+```
+
+**Python script:**
+```python
+def main(params=None):
+    # Access schema if "schema": true
+    schema = globals().get('__NEUTRAL_SCHEMA__')
+    return {
+        "data": {
+            "message": f"Hello, {params.get('name', 'World')}!"
+        }
+    }
+```
+
+#### **Flags BIF**
+
+```ntpl
+{:* Set flags for other BIFs *:}
+{:flg; flag1 flag2 flag3 :}
+
+{:* Used within other BIFs *:}
+{:include; {:flg; require noparse :} >> file.txt :}
+{:data; {:flg; inline :} >> {...} :}
+{:snip; {:flg; static :} name >> content :}
+```
+
+**Available flags:**
+- `require` - Error if file missing
+- `noparse` - Don't parse included file
+- `safe` - Encode all (implies noparse, encode_tags, encode_bifs)
+- `encode_tags` - Encode HTML tags
+- `encode_bifs` - Encode BIF delimiters
+- `encode_tags_after` - Encode after parsing
+- `inline` - Inline data for data BIF
+- `static` - Parse snippet at definition time
+- `partial` - Allow wildcard matching in allow
+- `casein` - Case-insensitive matching
+- `replace` - Return matched pattern in allow
+
+---
+
+### **File Structure & Architecture**
+
+#### **Component Template Structure**
+
+```
+src/component/cmp_XXXX_name/
+├── neutral/
+│   ├── component-init.ntpl          {:* Global snippets (loaded at startup) *:}
+│   └── route/
+│       ├── index-snippets.ntpl      {:* Shared across all routes *:}
+│       ├── locale-en.json           {:* Component translations *:}
+│       ├── locale-es.json
+│       ├── locale-fr.json
+│       ├── locale-de.json
+│       ├── data.json                {:* Shared route data *:}
+│       └── root/                    {:* Route templates *:}
+│           ├── content-snippets.ntpl    {:* Root route / *:}
+│           ├── data.json                {:* Route data *:}
+│           └── subroute/                {:* /subroute *:}
+│               ├── content-snippets.ntpl
+│               └── data.json
+```
+
+#### **Route Content Strategy**
+
+**Critical Pattern:** Every route MUST define `current:template:body-main-content`
+
+```ntpl
+{:* content-snippets.ntpl standard structure *:}
+
+{:* 1. Load route data (REQUIRED) *:}
+{:data; {:flg; require :} >> #/data.json :}
+
+{:* 2. Optional: Load route-specific translations *:}
+{:locale; {:flg; require :} >> #/locale.json :}
+
+{:* 3. Include shared snippets *:}
+{:!include; {:flg; require :} >> #/snippets.ntpl :}
+
+{:* 4. Override global snippets if needed *:}
+{:snip; current:template:body-carousel >> :}  {:* Disable carousel *:}
+{:snip; current:template:body-lateral-bar >> :}  {:* Disable sidebar *:}
+
+{:* 5. Override page heading *:}
+{:snip; current:template:page-h1 >>
+    <div class="container my-3">
+        <h1 class="border-bottom p-2">{:trans; {:;local::current->route->h1:} :}</h1>
+    </div>
+:}
+
+{:* 6. Define main content (REQUIRED) *:}
+{:snip; current:template:body-main-content >>
+    <div class="{:;local::current->theme->class->container:}">
+        <h3>{:trans; Page Title :}</h3>
+        <p>Content here...</p>
+    </div>
+:}
+
+{:* 7. Force output (REQUIRED - prevents 404 fallback) *:}
+{:^;:}
+```
+
+**Standard `data.json`:**
+```json
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Page Title",
+                "description": "Page description for SEO",
+                "h1": "Visible Page Heading"
+            }
+        }
+    }
+}
+```
+
+**Standard `index-snippets.ntpl` for component:**
+```ntpl
+{:* Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE) *:}
+
+{:* Data for all routes *:}
+{:data; {:flg; require :} >> #/data.json :}
+
+{:* Locale for current language only *:}
+{:locale;
+    #/locale-{:lang;:}.json
+:}{:else;
+    {:locale; #/locale-en.json :}
+:}
+
+{:* Shared snippets for all routes *:}
+{:snip; component-info >>
+    <div>Component: {:;CURRENT_COMP_NAME:}</div>
+    <div>Route: {:;CURRENT_COMP_ROUTE:}</div>
+:}
+```
+
+---
+
+### **Security Standards**
+
+#### **Variable Evaluation Rules**
+
+| Scenario | Safe | Unsafe |
+|----------|------|--------|
+| Direct output | `{:;varname:}` | - |
+| Array access | `{:;array->key:}` | - |
+| Dynamic key | `{:;array->{:;key:}:}` | - |
+| **Full variable eval** | - | `{:;{:;varname:}:}` ⚠️ |
+| With allowlist | `{:;{:allow; list >> {:;varname:} :}:}` | - |
+
+**Never do this:**
+```ntpl
+{:* DANGEROUS - allows arbitrary code injection *:}
+{:;{:;user_input:}:}
+{:include; {:;user_file:} :}
+```
+
+**Always use allowlists for dynamic content:**
+```ntpl
+{:* SAFE - validated against allowlist *:}
+{:declare; valid-pages >> home about contact :}
+{:include;
+    {:allow; valid-pages >> {:;page:} :}
+    {:else; error.ntpl :}
+:}
+```
+
+#### **CONTEXT Security**
+
+All user input is in CONTEXT and is **auto-escaped**:
+```ntpl
+{:* Safe - auto-escaped *:}
+{:;CONTEXT->POST->message:}
+
+{:* Dangerous - unfiltered raw output *:}
+{:!;CONTEXT->POST->message:}  {:* Only if you KNOW it's safe *:}
+```
+
+#### **File Inclusion Security**
+
+```ntpl
+{:* NEVER - direct variable in include *:}
+{:include; {:;filename:} :}  {:* ERROR: insecure file name *:}
+
+{:* NEVER - partial eval without allow *:}
+{:include; page-{:;name:}.ntpl :}  {:* DANGEROUS *:}
+
+{:* ALWAYS - use allowlist *:}
+{:declare; allowed >> home about :}
+{:include; {:allow; allowed >> {:;name:} :}.ntpl :}
+```
+
+#### **Schema Configuration**
+
+```json
+{
+    "config": {
+        "filter_all": false,      {:* true = escape ALL variables *:}
+        "cache_disable": false,   {:* true = disable all caching *:}
+        "disable_js": false,      {:* true = manual JS injection *:}
+        "debug_expire": 3600,     {:* Debug file expiration *:}
+        "debug_file": ""          {:* Debug enable file path *:}
+    }
+}
+```
+
+---
+
+### **Common Patterns & Recipes**
+
+#### **Form with Validation Errors**
+
+```ntpl
+{:* Define error display snippet *:}
+{:snip; form-field-error >>
+    {:filled; {:param; error :} >>
+        <div class="invalid-feedback">{:trans; {:param; error :} :}</div>
+    :}
+:}
+
+{:* Define form field with error handling *:}
+{:snip; form-field:username >>
+    <div class="input-group">
+        <span class="input-group-text">@</span>
+        <input
+            type="text"
+            name="username"
+            value="{:;CONTEXT->POST->username:}"
+            class="form-control {:filled; {:param; error :} >> is-invalid :}"
+        >
+    </div>
+    {:param; error >> {:;form_errors->username:} :}
+    {:snip; form-field-error :}
+:}
+```
+
+#### **Conditional Layout**
+
+```ntpl
+{:bool; HAS_SESSION >>
+    {:snip; user-dashboard :}
+:}{:else;
+    {:snip; guest-welcome :}
+:}
+```
+
+#### **Dynamic Class Names**
+
+```ntpl
+<div class="btn {:same; /{:;status:}/active/ >> btn-primary :}{:else; btn-secondary :}">
+    {:trans; {:;status:} :}
+</div>
+```
+
+#### **Translation with Variables**
+
+```ntpl
+{:* In locale file: "Welcome back, {:;username:}" *:}
+{:trans; Welcome back, {:;username:} :}
+```
+
+#### **Safe HTML Injection (Trusted Content)**
+
+```ntpl
+{:* When you trust the source but need HTML *:}
+{:code; {:flg; noparse :} >> {:;trusted_html:} :}
+```
+
+#### **Wrapping Pattern (from docs)**
+
+```ntpl
+{:* Prevent empty wrapper when snippet is empty *:}
+{:eval; {:snip; snippet-name :} >>
+    <li>{:;__eval__:}</li>
+:}
+```
+
+#### **Parameter Passing Pattern**
+
+```ntpl
+{:* Set parameters and include *:}
+{:code;
+    {:param; title >> My Title :}
+    {:param; active >> true :}
+    {:include; card.ntpl :}
+:}
+
+{:* In card.ntpl *:}
+<div class="card {:bool; {:param; active :} >> active :}">
+    <h3>{:param; title :}</h3>
+</div>
+```
+---
+
+### **Troubleshooting**
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Template renders empty | Missing `{:^;:}` | Add at end |
+| 404 on valid route | Include failed | Check `{:flg; require :}` paths |
+| Variables not showing | Wrong scope | Use `{:;local::...:}` for inherit data |
+| Security error "insecure varname" | Direct var eval | Use `{:allow; ... :}` |
+| Security error "insecure file name" | Direct file eval | Use `{:allow; ... :}` |
+| Translations not loading | Locale not included | Add `{:locale; ... :}` |
+| Cache not updating | Aggressive caching | Use `{:!cache; ... :}` or clear cache |
+| Snippet not found | Wrong file name | Snippets must be in files with "snippet" in name |
+| Parameter not available | Wrong scope | Use `{:+code; ... :}` to promote scope |
+
+---
+
+### **Integration with Python/Dispatcher**
+
+Templates receive data from `Dispatcher` classes:
+
+```python
+# In dispatcher.py
+dispatch.schema_data["user"] = {"name": "John"}      # Immutable: {:;user->name:}
+dispatch.schema_local_data["items"] = ["a", "b"]     # Mutable: {:;local::items:}
+```
+
+**Dispatcher sets automatically:**
+- `CURRENT_COMP_ROUTE` - Current route path
+- `CURRENT_COMP_ROUTE_SANITIZED` - Route with : instead of /
+- `CURRENT_NEUTRAL_ROUTE` - Path to neutral/route directory
+- `CURRENT_COMP_NAME` - Component directory name
+- `CURRENT_COMP_UUID` - Component UUID
+- `CONTEXT` - Request context (SESSION, POST, GET, HEADERS, etc.)
+- `HAS_SESSION` - "true" or null
+- `HAS_SESSION_STR` - "true" or "false"
+- `CSP_NONCE` - Content Security Policy nonce
+- `LTOKEN` - Link token for forms
+- `COMPONENTS_MAP_BY_NAME` - Component name → UUID mapping
+- `COMPONENTS_MAP_BY_UUID` - Component UUID → name mapping
+
+---

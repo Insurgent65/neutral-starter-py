@@ -6,332 +6,1752 @@ This document details how they work internally, how they interact with the core 
 
 ---
 
-## 1. Definition and Naming Rules
+## 1. Component Architecture Overview
 
-A component lives in its own folder under `src/component/`.
+## Implementation Checklist
 
-### Loading rules and prefix
-*   **Mandatory prefix**: The directory name must start with `cmp_`. Any folder that does not follow this pattern will be ignored.
-*   **Deactivation**: A component can be deactivated simply by renaming its folder, for example, changing `cmp_0500_login` to `_cmp_0500_login`.
-*   **Alphabetical Order**: Loading is done in alphabetical order. The number `NNNN` in the name is a useful convention to control this order.
+1.  **Create Directory**: `src/component/cmp_NNNN_name`
+2.  **Manifest**: `src/component/cmp_NNNN_name/manifest.json` (mandatory)
+3.  **Schema**: `src/component/cmp_NNNN_name/schema.json` (if needed, eg. for menu items, etc)
+4.  **Init**: `src/component/cmp_NNNN_name/__init__.py` (if needed)
+5.  **Route Init**: `src/component/cmp_NNNN_name/route/__init__.py` (if needed routes)
+6.  **Routes**: `src/component/cmp_NNNN_name/route/routes.py` (if needed routes)
+7.  **Template Data**: `src/component/cmp_NNNN_name/neutral/route/root/data.json`
+8.  **Template Content**: `src/component/cmp_NNNN_name/neutral/route/root/content-snippets.ntpl`
+9.  **Static Files**: `src/component/cmp_NNNN_name/static/` (if needed)
 
-### Priority and Overriding
+### 1.1 What is a Component?
 
-**General Rule:**
-Components are loaded in **alphabetical order**. A subsequent component extends or overrides the functionality of a previous one. This applies to Schema, Templates, Code Snippets, and routes.
+A component in Neutral TS Starter Py is a self-contained, modular unit that encapsulates:
+- **Backend Logic**: Python/Flask routes and business logic
+- **Frontend Templates**: NTPL templates for rendering
+- **Configuration**: Manifest, schema, and localization files
+- **Static Assets**: CSS, JavaScript, images
+- **Tests**: Component-specific test suite
 
-A subsequent component with the same route, Schema key (merge), snippet, etc., overrides the previous one.
+Components are isolated functional units that can be enabled, disabled, or overridden without affecting other parts of the application.
 
-**Fallback Blueprints (Components starting with `cmp_9`)**
-There is an exception for components starting with `cmp_9` (e.g., `cmp_9000_catchall`): their blueprints are not overwritten routes, allowing them to be used as fallbacks or catch-alls.
+### 1.2 Component Loading System
 
-For all other component elements, such as schemas, snippets, etc., the behavior remains the same, and they will be overwritten.
+Components are loaded in **alphabetical order** based on their folder name. This enables:
+- **Priority Control**: Later components can override earlier ones
+- **Modularity**: Components can be added/removed independently
+- **Fallback Patterns**: Components starting with `cmp_9` serve as catch-alls
 
----
+**Loading Order:**
+1. Components `cmp_0000` to `cmp_8999` (alphabetically)
+2. Components `cmp_9000` to `cmp_9999` (fallback/catch-all components)
 
-## 2. File Architecture
-
-A typical component (like `cmp_7000_hellocomp`) follows this structure:
-
+**Naming Convention:**
 ```
-src/component/cmp_name/
-├── manifest.json                         # Registration metadata (UUID, name, route)
-├── schema.json                           # Global data, menu, and translations
-├── custom.json                           # Local user overrides (DO NOT DISTRIBUTE)
-├── __init__.py                           # Main initialization (e.g., sys.path setup)
-├── lib/                                  # Internal component libraries
-├── static/                               # Component-specific static assets
-├── tests/                                # Pytest test suite for the component
-├── route/                                # Backend (Python/Flask)
-│   ├── __init__.py                       # Blueprint creation & config
-│   ├── routes.py                         # Route definitions
-│   └── dispatcher_name.py                # Custom Business Logic (optional)
-└── neutral/                              # Frontend (NTPL)
-    ├── component-init.ntpl               # Global snippets (available app-wide)
-    └── route/                            # Component-specific templates
-        ├── index-snippets.ntpl           # Snippets shared across this component
-        ├── locale.json                   # Translations (merged with schema)
-        └── root/                         # Template mapping to routes
-            ├── content-snippets.ntpl     # Template for the root route (/)
-            └── [subroute]/               # Folder for subroutes (e.g., /test1)
-                └── content-snippets.ntpl
+cmp_NNNN_name/
+│   ├── NNNN: Load order number (5000-7000 for normal components)
+│   └── name: Descriptive component name (lowercase, underscores)
 ```
 
----
+### 1.3 Component Lifecycle
 
-## 3. Loading Life Cycle
-
-When starting the application, the system performs the following steps:
-
-1.  **Discovery**: Scans `src/component/` looking for folders starting with `cmp_`.
-2.  **Registration**: Reads `manifest.json`. If `custom.json` exists, its `manifest` section overrides the original. If a matching entry exists in `config/config.db` (by component UUID), it is merged after `custom.json` and has final priority.
-3.  **Data Merging**: Loads `schema.json`. If `custom.json` exists, its `schema` section is merged. Then DB override data (if present) is merged. Finally, it's merged into the global application schema.
-4.  **Python Initialization**: Executes `init_component` in `__init__.py` (if it exists). This is often used to add the `lib/` directory to `sys.path`.
-5.  **Routes**: Executes `init_blueprint` in `route/__init__.py`. This creates the Flask Blueprint and registers routes.
-6.  **Global Templates**: Reads `neutral/component-init.ntpl`. Snippets here are registered globally. Evaluate on every request.
-
----
-
-## 4. Configuration Files
-
-### schema.json
-
-Defines the data structure and configuration. It is divided into critical sections for the operation of the Neutral engine.
-
-*   **config**: Internal engine configuration (cache, debug, etc.).
-*   **inherit**: Defines the local context and inheritance tools.
-    *   **data**: Variables accessible as `{:;local::varname:}`. Can be dynamically overridden.
-    *   **locale**: Translation system.
-        *   `current`: Current language.
-        *   `trans`: Dictionary of translations.
-    *   **snippets**: Definition of initial snippets (Global).
-*   **data**: Global variables accessible as `{:;varname:}`. By convention, contains environment information and **cannot be dynamically overridden** at runtime; they are global.
-
-### custom.json
-
-Allows overriding configuration without touching the original code.
-**Important Rule**: The component provider must never include this file; it is exclusively for local user customization.
-
-### config/config.db (optional)
-
-SQLite-backed configuration store for central overrides and future global settings.
-
-For component overrides, table `custom` uses `comp_uuid` (component UUID) as key.
-The `value_json` payload format matches `custom.json` (`manifest` and/or `schema` objects).
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    COMPONENT LIFECYCLE                       │
+├─────────────────────────────────────────────────────────────┤
+│  1. DISCOVERY: Scan src/component/ for cmp_* folders        │
+│  2. REGISTRATION: Read manifest.json, apply overrides       │
+│  3. SCHEMA MERGE: Load schema.json, merge with global       │
+│  4. PYTHON INIT: Execute __init__.py init_component()       │
+│  5. BLUEPRINT: Execute route/__init__.py init_blueprint()   │
+│  6. TEMPLATES: Load neutral/component-init.ntpl snippets    │
+│  7. READY: Component available for requests                 │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 5. Template System (NTPL)
+## 2. Complete Directory Structure
 
-Neutral Templating allows for code injection and extreme modularity.
+### 2.1 Standard Component Structure
 
-### Global Level: `neutral/component-init.ntpl`
-Loaded during discovery. It can include snippets, includes, and locales that will be available globally. Although loaded at startup, its content is evaluated on every request.
+```
+src/component/cmp_NNNN_name/
+├── manifest.json                    # Component identity (REQUIRED)
+├── schema.json                      # Configuration, menus, translations
+├── custom.json                      # Local overrides (NEVER commit)
+├── __init__.py                      # Component initialization
+├── README.md                        # Component documentation
+├── route/                           # Backend (Python/Flask)
+│   ├── __init__.py                  # Blueprint initialization
+│   ├── routes.py                    # Flask route definitions
+│   └── dispatcher_name.py           # Custom business logic (optional)
+├── neutral/                         # Frontend (NTPL)
+│   ├── component-init.ntpl          # Global snippets (app-wide)
+│   ├── obj/                         # Template-to-Python mappings
+│   │   └── object.json              # Python object definitions
+│   └── route/                       # Component templates
+│       ├── index-snippets.ntpl      # Component-level snippets
+│       ├── locale-xx.json           # Translations (es, fr, de, en)
+│       ├── data.json                # Shared route metadata
+│       └── root/                    # Template root for routes
+│           ├── data.json            # Route metadata
+│           ├── content-snippets.ntpl # Main template
+│           └── subroute/            # Subroute templates
+│               ├── data.json
+│               └── content-snippets.ntpl
+├── static/                          # CSS, JS, images
+├── src/                             # Backend logic snippets
+│   └── module.py                    # Python functions for templates
+├── lib/                             # Private Python libraries
+│   └── uuid_name/                   # Namespaced package
+└── tests/                           # Pytest test suite
+    ├── conftest.py                  # Test configuration
+    └── test_component.py            # Component tests
+```
 
-### Component Level: `neutral/route/index-snippets.ntpl`
-Loaded dynamically for all routes served by the component. Ideal for common layouts or shared logic of the module.
+### 2.2 Minimum Viable Structure
 
-### Route Level: `neutral/route/root/[ROUTE]/content-snippets.ntpl`
-Contains the specific template for a page.
-*   **Convention**: Must define the `current:template:body-main-content` snippet, which is what the main layout will render inside the `<main>` tag.
-*   **Note**: The specific templates are located inside the `root/` subdirectory within `neutral/route/`.
+For a simple component with no custom logic:
+
+```
+src/component/cmp_NNNN_name/
+├── manifest.json
+├── schema.json
+├── route/
+│   ├── __init__.py
+│   └── routes.py
+└── neutral/
+    └── route/
+        └── root/
+            ├── data.json
+            └── content-snippets.ntpl
+```
 
 ---
 
-## 6. Routes and Backend (Flask)
+## 3. Configuration Files
 
-If the component requires server logic, the `route/` folder is used.
+### 3.1 manifest.json (REQUIRED)
 
-### Blueprints (`route/__init__.py`)
-Must define `init_blueprint` and use `create_blueprint`. The system automatically sets `bp.neutral_route` to the absolute path of the component's `neutral/route` directory.
-
-### Dispatcher
-The `Dispatcher` class connects Flask with NTPL.
-Use `core.dispatcher.Dispatcher` (or a subclass).
-Signature: `Dispatcher(request, comp_route, neutral_route)`
-
-*   `request`: Flask request object.
-*   `comp_route`: Relative route path (e.g., `""` for root, `"test/page"` for subpages).
-*   `neutral_route`: Base template directory, usually `bp.neutral_route`.
-
----
-
-## 7. Guide: Real World Example (Hello Component)
-
-This example is based on `src/component/cmp_7000_hellocomp`, which illustrates the full capabilities of a component.
-
-### 1. Registration (`manifest.json`)
-Defines the component's unique identity and its base URL prefix. UUID must be unique and follow the `name_random` format.
-
+Defines component identity and registration metadata.
 
 ```json
 {
-    "uuid": "hellocomp_0yt2sa",
-    "name": "Hello Component",
-    "description": "Component example, ilustrates the basic structure of a component",
-    "version": "1.0.0",
-    "route": "/hello-component"
+  "uuid": "component_name_random",
+  "name": "Component Display Name",
+  "description": "Detailed component description",
+  "version": "1.0.0",
+  "route": "/url-prefix",
+  "required": {
+    "component": {
+      "dependency_uuid": "version_constraint"
+    }
+  },
+  "config": {
+    "cache_seconds": 300,
+    "custom_setting": "value"
+  }
 }
 ```
 
-### 2. Initialization and Libraries (`__init__.py` & `lib/`)
-Components can have their own libraries. Use `init_component` to expose them.
+**Field Requirements:**
 
-```python
-import os
-import sys
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `uuid` | string | **Yes** | Unique identifier, format: `name_random` (alphanumeric + underscore) |
+| `name` | string | **Yes** | Human-readable component name |
+| `description` | string | **Yes** | Component description |
+| `version` | string | **Yes** | Semantic version (major.minor.patch) |
+| `route` | string | **Yes** | Base URL prefix for component routes |
+| `required` | object | No | Component dependencies |
+| `config` | object | No | Component-specific configuration |
 
-def init_component(component, component_schema, _schema):
-    # Add 'lib' folder to sys.path to allow: from hellocomp_0yt2sa import ...
-    lib_path = os.path.join(component['path'], 'lib')
-    if lib_path not in sys.path:
-        sys.path.insert(0, lib_path)
+**UUID Rules:**
+- Must be unique across all components
+- Format: `name_random` (lowercase alphanumeric + underscore)
+- Minimum length: 5 characters
+- Maximum length: 50 characters
+- Must contain at least one underscore
+- Use UUID for cross-component references (not folder name)
+
+**Example:**
+```json
+{
+  "uuid": "dashboard_8x90s",
+  "name": "Dashboard",
+  "description": "User dashboard with statistics and quick actions",
+  "version": "1.0.0",
+  "route": "/dashboard"
+}
 ```
 
-### 3. Configuration and Data (`schema.json`)
-The `schema.json` file is merged into the global application schema.
+### 3.2 schema.json
 
-To add a menu item, you **must** define both the `drawer` (the top-level tab) and the `menu` (the link items inside the tab). The menu may display different options depending on whether the user is logged in ("session:true") or not ("session:").
+Defines configuration, menu entries, translations, and global data.
+Replace name_random with the uuid generated by the skill in `[:;data->name_random->manifest->route:]` eg.: `[:;data->dashboard_8x90s->manifest->route:]`
+
+Include only the translation in schema.json; for global elements, such as menu options, include other translations in separate locale.json files, or leave the non-global translation for a later step.
 
 ```json
 {
-    "inherit": {
-        "locale": {
-            "trans": {
-                "es": {
-                    "Hello Component": "Componente Hola"
-                }
-            }
-        },
-        "data": {
-            "drawer": {
-                "menu": {
-                    "session:": {
-                        "hello-tab": {
-                            "name": "Hello Component",
-                            "tabs": "hello-tab",
-                            "icon": "x-icon-info"
-                        }
-                    },
-                    "session:true": {
-                        "hello-tab": {
-                            "name": "Hello Component",
-                            "tabs": "hello-tab",
-                            "icon": "x-icon-info"
-                        }
-                    }
-                }
-            },
-            "menu": {
-                "session:": {
-                    "hello-tab": {
-                        "hello": {
-                            "text": "Hello Component",
-                            "link": "[:;data->hellocomp_0yt2sa->manifest->route:]",
-                            "icon": "x-icon-greeting"
-                        }
-                    }
-                },
-                "session:true": {
-                    "hello-tab": {
-                        "hello": {
-                            "text": "Hello Component",
-                            "link": "[:;data->hellocomp_0yt2sa->manifest->route:]",
-                            "icon": "x-icon-greeting"
-                        }
-                    }
-                }
-            }
-        }
+  "inherit": {
+    "locale": {
+      "trans": {
+        "en": { "Menu Item": "Menu Item" },
+        "es": { "Menu Item": "Elemento del Menú" },
+        "fr": { "Menu Item": "Élément du Menu" },
+        "de": { "Menu Item": "Menüelement" }
+      }
     },
     "data": {
-        "hello-component": { "hello": "Hello from hello component" }
+      "drawer": {
+        "menu": {
+          "session:": {
+            "tab-id": {
+              "name": "Tab Name",
+              "tabs": "tab-id",
+              "icon": "x-icon-info"
+            }
+          },
+          "session:true": {
+            "tab-id": {
+              "name": "Tab Name",
+              "tabs": "tab-id",
+              "icon": "x-icon-info"
+            }
+          }
+        }
+      },
+      "menu": {
+        "session:": {
+          "tab-id": {
+            "item-id": {
+              "text": "Menu Item",
+              "link": "[:;data->name_random->manifest->route:]",
+              "icon": "x-icon-info"
+            }
+          }
+        },
+        "session:true": {
+          "tab-id": {
+            "item-id": {
+              "text": "Menu Item",
+              "link": "[:;data->name_random->manifest->route:]",
+              "icon": "x-icon-info"
+            }
+          }
+        }
+      },
+      "navbar": {
+        "menu": {
+          "session:": {
+            "item-id": {
+              "name": "Item Name",
+              "link": "#modal-id",
+              "icon": "x-icon-info",
+              "prop": {
+                "data-bs-toggle": "modal",
+                "data-bs-target": "#modal-id"
+              }
+            }
+          },
+          "session:true": {
+            "item-id": {
+              "name": "Item Name",
+              "link": "#modal-id",
+              "icon": "x-icon-info"
+            }
+          }
+        }
+      }
     }
+  },
+  "data": {
+    "core": {
+      "forms": {
+        "form_name": {
+          "check_fields": ["field1", "field2"],
+          "validation": {
+            "minfields": 2,
+            "maxfields": 5,
+            "allow_fields": ["field1", "field2", "ftoken.*"]
+          },
+          "rules": {
+            "field1": {
+              "required": true,
+              "minlength": 3,
+              "maxlength": 50,
+              "regex": "^[a-zA-Z]+$"
+            },
+            "field2": {
+              "required": true,
+              "minlength": 6,
+              "maxlength": 200,
+              "regex": "^[^@\s]+@[^@\s]+\.[^@\s]+$",
+              "dns": "MX"
+            }
+          }
+        }
+      }
+    },
+    "component-specific": {
+      "key": "value"
+    }
+  }
 }
 ```
 
-### 4. Blueprint & Routes (`route/`)
-Components use Flask Blueprints. The `create_blueprint` utility sets up the prefix and template paths.
+**Important Schema Rules:**
 
-**Blueprint (`route/__init__.py`)**:
+1. **Menu Structure**: Define BOTH `drawer` (tab) and `menu` (items) for navigation
+2. **Session States**: Use `session:` for logged-out users, `session:true` for logged-in
+3. **Route References**: Use `[:;data->dashboard_8x90s->manifest->route:]` in schema.json, it's a specific format for schema.json, in the templates use the format: `{:;dashboard_8x90s->manifest->route:}`
+4. **Form Validation**: Define rules under `data.core.forms.form_name.rules`
+5. **Translations**: Place global translations in `inherit.locale.trans`
+
+### 3.3 custom.json (Optional, Never Commit)
+
+Local overrides for development or deployment-specific configuration.
+
+```json
+{
+  "manifest": {
+    "route": "/custom-route"
+  },
+  "schema": {
+    "inherit": {
+      "data": {
+        "custom_setting": "override_value"
+      }
+    }
+  }
+}
+```
+
+**Important:**
+- Never commit `custom.json` to version control
+- Add to `.gitignore`
+- Use for local development overrides only
+- Production overrides should use `config/config.db` table `custom`
+
+### 3.4 config/config.db Overrides
+
+For centralized component overrides in production:
+
+```sql
+-- Table: custom
+-- Columns: comp_uuid (TEXT), value_json (TEXT), enabled (INTEGER)
+
+INSERT INTO custom (comp_uuid, value_json, enabled)
+VALUES ('dashboard_8x90s', '{"manifest": {"route": "/prod-dashboard"}}', 1);
+```
+
+---
+
+## 4. Backend Implementation
+
+### 4.1 route/__init__.py (Blueprint Initialization)
+
 ```python
+"""Component Blueprint Module."""
 from app.components import create_blueprint
 
 def init_blueprint(component, component_schema, _schema):
+    """Initialize Flask Blueprint for this component."""
     bp = create_blueprint(component, component_schema)
-    from . import routes
+    # Import routes after creating the blueprint
+    from . import routes  # pylint: disable=import-error,C0415,W0611
 ```
 
-**Routes (`route/routes.py`)**:
-```python
-from flask import request
-from . import bp
-from .dispatcher_hellocomp import DispatcherHelloComp
+**Key Points:**
+- Must define `init_blueprint` function
+- Use `create_blueprint` utility (sets `bp.neutral_route` automatically)
+- Import routes module after blueprint creation
+- Blueprint name is auto-generated: `bp_cmp_NNNN_name`
 
-@bp.route("/")
-def index():
-    # Dispatcher(request, relative_route, base_template_dir)
-    dispatch = DispatcherHelloComp(request, "", bp.neutral_route)
+### 4.2 route/routes.py (Route Definitions)
+
+#### Simple Component (Single Dispatcher)
+
+```python
+"""Component routes module."""
+from flask import Response, request
+from core.dispatcher import Dispatcher
+from . import bp
+
+@bp.route("/", defaults={"route": ""}, methods=["GET"])
+@bp.route("/<path:route>", methods=["GET"])
+def catch_all(route) -> Response:
+    """Handle all GET requests."""
+    dispatch = Dispatcher(request, route, bp.neutral_route)
     return dispatch.view.render()
 ```
 
-### 5. Frontend Templates (NTPL)
+#### Complex Component (Multiple Dispatchers)
 
-**Global Snippets (`neutral/component-init.ntpl`)**:
-```html
-{:snip; hellocomp-global-header >>
-    <div class="alert alert-info">Global Component Snippet</div>
-:}
+```python
+"""Component routes module."""
+from flask import Response, request
+from app.config import Config
+from app.extensions import limiter
+from . import bp
+from .dispatcher_main import DispatcherMain
+from .dispatcher_form import DispatcherFormCustom
+
+@bp.route("/", defaults={"route": ""}, methods=["GET"])
+def index(route) -> Response:
+    """Handle root route."""
+    dispatch = DispatcherMain(request, route, bp.neutral_route)
+    dispatch.schema_data["dispatch_result"] = dispatch.load_data()
+    return dispatch.view.render()
+
+@bp.route("/form/<ltoken>", defaults={"route": "form"}, methods=["GET"])
+def form_get(route, ltoken) -> Response:
+    """Handle form GET request."""
+    dispatch = DispatcherFormCustom(request, route, bp.neutral_route, ltoken, "my_form")
+    dispatch.schema_data["dispatch_result"] = dispatch.form_get()
+    return dispatch.view.render()
+
+@bp.route("/form/<ltoken>", defaults={"route": "form"}, methods=["POST"])
+@limiter.limit(Config.FORM_LIMITS, error_message="Please wait.")
+def form_post(route, ltoken) -> Response:
+    """Handle form POST request."""
+    dispatch = DispatcherFormCustom(request, route, bp.neutral_route, ltoken, "my_form")
+    dispatch.schema_data["dispatch_result"] = dispatch.form_post()
+    return dispatch.view.render()
+
+@bp.route("/ajax/<action>", methods=["GET"])
+def ajax_action(route, action) -> Response:
+    """Handle AJAX requests."""
+    dispatch = DispatcherMain(request, route, bp.neutral_route)
+    dispatch.schema_data["dispatch_result"] = dispatch.ajax_action(action)
+    return dispatch.view.render()
 ```
 
-**Page Content (`neutral/route/root/content-snippets.ntpl`)**:
-The specific view for the root route (`/hello-component`).
+#### Static File Serving
+
+```python
+"""Component routes module with static file support."""
+import os
+from flask import Response, request, send_from_directory
+from app.config import Config
+from core.dispatcher import Dispatcher
+from . import bp
+
+STATIC = f"{bp.component['path']}/static"
+
+@bp.route("/", defaults={"route": ""}, methods=["GET"])
+@bp.route("/<path:route>", methods=["GET"])
+def catch_all(route) -> Response:
+    """Handle all GET requests, serve static files if they exist."""
+    # Check if route is a static file
+    if route:
+        file_path = os.path.join(STATIC, route)
+        if os.path.exists(file_path) and not os.path.isdir(file_path):
+            response = send_from_directory(STATIC, route)
+            response.headers["Cache-Control"] = Config.STATIC_CACHE_CONTROL
+            return response
+
+    # Use dispatcher for template routes
+    dispatch = Dispatcher(request, route, bp.neutral_route)
+    return dispatch.view.render()
+```
+
+### 4.3 Custom Dispatcher (dispatcher_name.py)
+
+#### Basic Custom Dispatcher
+
+```python
+"""Custom dispatcher for component."""
+from core.dispatcher import Dispatcher
+
+class DispatcherCustom(Dispatcher):
+    """Custom dispatcher with business logic."""
+
+    def __init__(self, request, comp_route, neutral_route=None):
+        super().__init__(request, comp_route, neutral_route)
+        # Set component-specific local data
+        self.schema_local_data['component_key'] = "default_value"
+        self.schema_local_data['show_sidebar'] = "true"
+
+    def load_data(self) -> bool:
+        """Load data for templates."""
+        try:
+            # Add data to templates
+            self.schema_data["items"] = self._fetch_items()
+            self.schema_data["items_count"] = str(len(self.schema_data["items"]))
+            self.schema_local_data["message"] = "Data loaded successfully"
+            return True
+        except Exception as e:
+            self.schema_data["error_message"] = str(e)
+            self.schema_local_data["message"] = "Failed to load data"
+            return False
+
+    def _fetch_items(self) -> list:
+        """Private helper to fetch items from database."""
+        result = self.model.exec("component", "get-items", {})
+        return result.get("rows", []) if result else []
+```
+
+#### Form Dispatcher (Extending DispatcherForm)
+
+```python
+"""Form dispatcher with validation."""
+from core.dispatcher_form import DispatcherForm
+
+class DispatcherFormCustom(DispatcherForm):
+    """Form dispatcher with custom validation."""
+
+    def __init__(self, req, comp_route, neutral_route=None, ltoken=None, form_name="my_form"):
+        super().__init__(req, comp_route, neutral_route, ltoken, form_name)
+        self.schema_local_data['form_title'] = "Contact Form"
+
+    def form_get(self) -> bool:
+        """Validate GET request."""
+        if not self.valid_form_tokens_get():
+            self.error['form']['ltoken'] = "true"
+            return False
+        return True
+
+    def form_post(self) -> bool:
+        """Process form submission."""
+        # Validate tokens
+        if not self.valid_form_tokens_post():
+            self.error['form']['ltoken'] = "true"
+            return False
+
+        # Validate form-level constraints
+        if not self.valid_form_validation():
+            self.error['form']['validation'] = "true"
+            return False
+
+        # Validate individual fields
+        if self.any_error_form_fields("ref:my_form_error"):
+            return False
+
+        # Process valid form data
+        try:
+            email = self.schema_data["CONTEXT"]["POST"].get("email")
+            message = self.schema_data["CONTEXT"]["POST"].get("message")
+
+            # Store or process data
+            self.model.exec("component", "save-message", {
+                "email": email,
+                "message": message
+            })
+
+            self.form_submit["result"] = {
+                "success": "true",
+                "message": f"Thank you, {email}! Your message has been sent."
+            }
+            return True
+        except Exception as e:
+            self.form_submit["result"] = {
+                "success": "false",
+                "error": "SUBMISSION_FAILED",
+                "message": "Failed to process your request."
+            }
+            return False
+```
+
+#### Authentication Dispatcher (Extending DispatcherFormSign pattern)
+
+```python
+"""Authentication dispatcher example."""
+from core.dispatcher_form import DispatcherForm
+from core.mail import Mail
+from constants import USER_EXISTS
+
+class DispatcherFormAuth(DispatcherForm):
+    """Authentication dispatcher with user management."""
+
+    def __init__(self, req, comp_route, neutral_route=None, ltoken=None, form_name="auth_form"):
+        super().__init__(req, comp_route, neutral_route, ltoken, form_name)
+
+    def validate_post(self, error_prefix) -> bool:
+        """Validate POST request."""
+        # Check session state
+        if self.schema_data["CONTEXT"]["SESSION"]:
+            self.error["form"]["already_session"] = "true"
+            return False
+
+        # Validate tokens
+        if not self.valid_form_tokens_post():
+            return False
+
+        # Validate form constraints
+        if not self.valid_form_validation():
+            return False
+
+        # Validate fields
+        if self.any_error_form_fields(error_prefix):
+            return False
+
+        return True
+
+    def create_user(self, user_data) -> dict:
+        """Create new user account."""
+        result = self.user.create(user_data)
+
+        if not result.get("success"):
+            self.form_submit["result"] = {
+                "success": "false",
+                "error": result.get("error", "REGISTRATION_FAILED"),
+                "message": result.get("message", "Failed to create user"),
+            }
+            return self.form_submit["result"]
+
+        # Send confirmation email
+        mail = Mail(self.schema.properties)
+        mail.send("register", result.get('user_data', {}))
+
+        self.form_submit["result"] = {
+            "success": "true",
+            "message": "Registration completed. Please check your email."
+        }
+        return self.form_submit["result"]
+
+    def create_session(self, user_data) -> bool:
+        """Create user session after authentication."""
+        from utils.utils import format_ua
+        from app.config import Config
+
+        session_data = {
+            "PATH": self.schema_data["CONTEXT"]["PATH"],
+            "METHOD": self.schema_data["CONTEXT"]["METHOD"],
+            "HEADERS": self.schema_data["CONTEXT"]["HEADERS"],
+            "UA": self.schema_data["CONTEXT"]["UA"],
+            "user_data": user_data,
+        }
+
+        ua = self.schema_data["CONTEXT"].get("UA", "")
+        session_ua = format_ua(ua) if ua else "none"
+
+        session_cookie = self.session.create(user_data["userId"], session_ua, session_data)
+        self.schema_data["CONTEXT"]["SESSION"] = session_cookie[Config.SESSION_KEY]["value"]
+        self.view.add_cookie(session_cookie)
+
+        return True
+```
+
+---
+
+## 5. Frontend Templates (NTPL)
+
+Neutral TS uses **BIFs (Built-in Functions)** wrapped in `{: :}`.
+
+**Basic Structure**
+`{: [modifiers] name ; [flags] params >> code :}`
+
+- **Immutable Data**: `{:;varname:}`
+- **Local Mutable Data**: `{:;local::varname:}`
+- **Object/Array Access**: `{:;array->key:}`
+- **Dynamic Access**: `{:;array->{:;key:}:}`
+
+### 5.1 Template File Structure
+
+```
+neutral/route/
+├── index-snippets.ntpl          # Component-level snippets
+├── locale-xx.json               # Translations
+├── data.json                    # Shared metadata
+└── root/
+    ├── data.json                # Root route metadata
+    ├── content-snippets.ntpl    # Root route template
+    └── subroute/
+        ├── data.json            # Subroute metadata
+        └── content-snippets.ntpl # Subroute template
+```
+
+### 5.2 Route Metadata (data.json)
+
+```json
+{
+  "data": {
+    "current": {
+      "route": {
+        "title": "Page Title",
+        "description": "SEO description for search engines",
+        "h1": "Visible Page Heading"
+      }
+    }
+  }
+}
+```
+
+### 5.3 Main Template (content-snippets.ntpl)
+
 ```html
-{:snip; current:template:body-main-content >>
-    <div class="container">
-        <h3>{:trans; {:;hello-component->hello:} :}</h3>
-        {:snip; hellocomp-global-header :}
-    </div>
+{:* Copyright (C) 2025 Component Author *:}
+{:*
+Data for this route
+-------------------
+*:}
+{:data; #/data.json :}
+
+{:*
+Locale for this route (optional)
+--------------------------------
+*:}
+{:locale; {:flg; require :} >> #/locale.json :}
+
+{:*
+Disable carousel (optional)
+---------------------------
+*:}
+{:snip; current:template:body-carousel >> :}
+
+{:*
+Disable lateral bar (optional)
+------------------------------
+*:}
+{:snip; current:template:body-lateral-bar >> :}
+
+{:*
+Overwrite page heading (optional)
+---------------------------------
+*:}
+{:snip; current:template:page-h1 >>
+<div class="container my-3">
+  <h1 class="border-bottom p-2">{:trans; {:;local::current->route->h1:} :}</h1>
+</div>
 :}
+
+{:*
+Main content snippet (REQUIRED)
+-------------------------------
+*:}
+{:snip; current:template:body-main-content >>
+<div class="{:;local::current->theme->class->container:}">
+  <h3>{:trans; {:;local::current->route->h1:} :}</h3>
+  <p>{:trans; Component content here. :}</p>
+
+  {:* Access schema_data (immutable) *:}
+  <p>Result: {:;dispatch_result:}</p>
+  <p>Items Count: {:;items_count:}</p>
+
+  {:* Access schema_local_data (mutable) *:}
+  <p>Message: {:;local::message:}</p>
+
+  {:* Conditional rendering *:}
+  {:bool; dispatch_result >>
+    <div class="alert alert-success">Success!</div>
+  :}{:else;
+    <div class="alert alert-danger">Failed!</div>
+  :}
+
+  {:* Session-aware content *:}
+  {:bool; HAS_SESSION >>
+    <p>Welcome back, {:;CURRENT_USER->profile->alias:}!</p>
+  :}{:else;
+    <p>Please sign in to access more features.</p>
+  :}
+
+  {:* Loop through data *:}
+  {:each; items key item >>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{:;item->name:}</h5>
+        <p class="card-text">{:;item->description:}</p>
+      </div>
+    </div>
+  :}
+
+  {:* Link with LTOKEN for forms *:}
+  <a href="{:;CURRENT_COMP_ROUTE:}/form/{:;LTOKEN:}" class="btn btn-primary">
+    Go to Form
+  </a>
+
+  {:* CSP-compliant inline script *:}
+  <script nonce="{:;CSP_NONCE:}">
+    console.log("Component loaded");
+  </script>
+</div>
+:}
+
+{:*
+Force output detection (REQUIRED)
+---------------------------------
+*:}
 {:^;:}
 ```
 
-### 6. Static Files (`static/`)
+### 5.4 Component-Level Snippets (index-snippets.ntpl)
 
-Assets in the `static/` folder can be served by the component.
+```html
+{:* Copyright (C) 2025 Component Author *:}
+{:*
+Data for all component routes
+-----------------------------
+*:}
+{:data; {:flg; require :} >> #/data.json :}
+
+{:*
+Locale for all component routes
+-------------------------------
+Only current language file is loaded
+*:}
+{:locale;
+  #/locale-{:lang;:}.json
+:}{:else;
+  {:locale; #/locale-en.json :}
+:}
+
+{:*
+Reusable snippets for this component
+------------------------------------
+*:}
+{:snip; component-custom-snippet >>
+<div class="component-widget">
+  <h4>{:trans; Widget Title :}</h4>
+  <p>{:trans; Widget content here. :}</p>
+</div>
+:}
+
+{:*
+Modal definitions
+-----------------
+*:}
+{:snip; component-modal >>
+<div class="modal fade" id="componentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{:trans; Modal Title :}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        {:trans; Modal content here. :}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          {:trans; Close :}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+:}
+
+{:moveto; /body >>
+{:snip; component-modal :}
+:}
+```
+
+### 5.5 Global Snippets (component-init.ntpl)
+
+```html
+{:* Copyright (C) 2025 Component Author *:}
+{:*
+Snippets available globally across all components
+-------------------------------------------------
+*:}
+{:snip; global-component-snippet >>
+<div class="global-widget">
+  {:trans; Global content available everywhere. :}
+</div>
+:}
+
+{:*
+Add CSS/JS to head
+------------------
+*:}
+{:snip; current:template:head:component >>
+<link nonce="{:;CSP_NONCE:}" rel="stylesheet" href="{:;CURRENT_COMP_ROUTE:}/static/component.css" />
+<style nonce="{:;CSP_NONCE:}">
+  .component-custom { color: blue; }
+</style>
+:}
+
+{:*
+Add JavaScript to body end
+--------------------------
+*:}
+{:snip; current:template:body-end:component >>
+<script nonce="{:;CSP_NONCE:}">
+  (function() {
+    console.log("Component initialized");
+  })();
+</script>
+:}
+```
+
+### 5.6 Translation Files (locale-xx.json)
+
+#### Single Language File (locale-es.json)
+
+```json
+{
+  "_comment_:trans": "Translation file for Spanish",
+  "trans": {
+    "es": {
+      "Component Name": "Nombre del Componente",
+      "Page Title": "Título de la Página",
+      "Welcome": "Bienvenido",
+      "ref:form_error_required": "Campo requerido",
+      "ref:form_error_invalid": "Valor inválido"
+    }
+  }
+}
+```
+
+#### Multi-Language File (locale.json)
+
+```json
+{
+  "_comment_:trans": "Multi-language translation file",
+  "trans": {
+    "en": {
+      "Component Name": "Component Name",
+      "Welcome": "Welcome"
+    },
+    "es": {
+      "Component Name": "Nombre del Componente",
+      "Welcome": "Bienvenido"
+    },
+    "fr": {
+      "Component Name": "Nom du Composant",
+      "Welcome": "Bienvenue"
+    },
+    "de": {
+      "Component Name": "Komponentenname",
+      "Welcome": "Willkommen"
+    }
+  }
+}
+```
+
+### 5.7 Translation Scope Strategy
+
+| Scope | Location | Use Case |
+|-------|----------|----------|
+| **Global (App-wide)** | `schema.json` → `inherit.locale.trans` | Menu items, navigation labels |
+| **Component-wide** | `neutral/route/locale-xx.json` | Component-specific UI text |
+| **Route-specific** | `neutral/route/root/subroute/locale.json` | Page-specific content |
+| **Reference Keys** | Any locale file with `ref:` prefix | Error messages, validation texts |
+
+**Priority Order:** Route → Component → Global (later overrides earlier)
+
+---
+
+## 6. Form Handling
+
+### 6.1 Form Definition in schema.json
+
+```json
+{
+  "data": {
+    "core": {
+      "forms": {
+        "contact_form": {
+          "check_fields": ["name", "email", "message", "agree"],
+          "validation": {
+            "minfields": 3,
+            "maxfields": 5,
+            "allow_fields": ["name", "email", "message", "agree", "ftoken.*"]
+          },
+          "rules": {
+            "name": {
+              "required": true,
+              "minlength": 3,
+              "maxlength": 50,
+              "regex": "^[a-zA-Z\s]+$"
+            },
+            "email": {
+              "required": true,
+              "minlength": 6,
+              "maxlength": 200,
+              "regex": "^[^@\s]+@[^@\s]+\.[^@\s]+$",
+              "dns": "MX"
+            },
+            "message": {
+              "required": true,
+              "minlength": 10,
+              "maxlength": 1000
+            },
+            "agree": {
+              "required": true,
+              "value": "true"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 6.2 Form Template (content-snippets.ntpl)
+
+```html
+{:* Form wrapper *:}
+{:snip; contact_form-wrapper >>
+<div id="form-wrapper-contact">
+  {:coalesce;
+    {:snip; forms:error-ltoken:{:;contact_form->error->form->ltoken:} :}
+    {:snip; forms:error-ftoken:{:;contact_form->error->form->ftoken:} :}
+    {:snip; forms:error-validation:{:;contact_form->error->form->validation:} :}
+    {:snip; contact_form-form :}
+  :}
+</div>
+:}
+
+{:* Form fields *:}
+{:snip; contact_form-form >>
+{:fetch; |{:;CURRENT_COMP_ROUTE:}/form/{:;LTOKEN:}|form|form-wrapper-contact|{:;local::current->forms->class:}|contact_form| >>
+
+  {:* Name field *:}
+  <div class="input-group">
+    <span class="input-group-text {:;local::x-icon-user:}"></span>
+    <div class="form-floating">
+      <input
+        type="text"
+        id="contact_form-name"
+        name="name"
+        value="{:;CONTEXT->POST->name:}"
+        class="form-control"
+        placeholder="{:trans; Your name :}"
+        minlength="{:;core->forms->contact_form->rules->name->minlength:}"
+        maxlength="{:;core->forms->contact_form->rules->name->maxlength:}"
+        {:bool; core->forms->contact_form->rules->name->required >> required :}
+      >
+      <label for="contact_form-name">{:trans; Your name :}</label>
+    </div>
+  </div>
+  {:snip; error-msg:name :}
+
+  {:* Email field *:}
+  <div class="input-group">
+    <span class="input-group-text {:;local::x-icon-email:}"></span>
+    <div class="form-floating">
+      <input
+        type="email"
+        id="contact_form-email"
+        name="email"
+        value="{:;CONTEXT->POST->email:}"
+        class="form-control ftoken-field-key ftoken-field-value"
+        placeholder="{:trans; Your email :}"
+        data-ftokenid="contact_form-ftoken"
+      >
+      <label for="contact_form-email">{:trans; Your email :}</label>
+    </div>
+  </div>
+  {:snip; error-msg:email :}
+
+  {:* Message field *:}
+  <div class="form-floating">
+    <textarea
+      id="contact_form-message"
+      name="message"
+      class="form-control"
+      placeholder="{:trans; Your message :}"
+      minlength="{:;core->forms->contact_form->rules->message->minlength:}"
+      maxlength="{:;core->forms->contact_form->rules->message->maxlength:}"
+    >{:;CONTEXT->POST->message:}</textarea>
+    <label for="contact_form-message">{:trans; Your message :}</label>
+  </div>
+  {:snip; error-msg:message :}
+
+  {:* Agree checkbox *:}
+  <div class="form-check">
+    <input
+      type="checkbox"
+      id="contact_form-agree"
+      name="agree"
+      class="form-check-input"
+      value="true"
+      {:filled; CONTEXT->POST->agree >> checked :}
+    >
+    <label class="form-check-label" for="contact_form-agree">
+      {:trans; I agree with the terms :}
+    </label>
+  </div>
+  {:snip; error-msg:agree :}
+
+  {:* FToken field *:}
+  {:code;
+    {:param; ftoken_fetch_id >> contact_form-ftoken :}
+    {:param; ftoken_form_id >> contact_form :}
+    {:snip; ftoken:form-field :}
+  :}
+
+  {:* Submit button *:}
+  <button type="submit" class="btn btn-primary">
+    {:trans; Send Message :}
+  </button>
+:}
+:}
+```
+
+### 6.3 Form Error Handling
+
+```html
+{:* Error message snippet *:}
+{:snip; error-msg:name >>
+{:filled; contact_form->error->field->name >>
+  <div class="invalid-feedback d-block">
+    {:trans; {:;contact_form->error->field->name:} :}
+  </div>
+:}
+:}
+
+{:* Form-level error *:}
+{:snip; forms:error-validation:{:;contact_form->error->form->validation:} >>
+<div class="alert alert-danger">
+  {:trans; Please check the form for errors. :}
+</div>
+:}
+```
+
+---
+
+## 7. Security Standards
+
+### 7.1 Critical Security Rules
+
+| Rule | Description | Implementation |
+|------|-------------|----------------|
+| **No SQL in Python** | Never write raw SQL in Python code | Use `src/model/*.json` files |
+| **Use CONTEXT** | Access user data through CONTEXT object | `self.schema_data['CONTEXT']['POST']` |
+| **Translate UI Text** | All visible text must be translatable | Wrap with `{:trans; :}` |
+| **Include LTOKEN** | Forms must have link tokens | `{:;LTOKEN:}` in form URLs |
+| **CSP Nonce** | Inline scripts need nonce | `nonce="{:;CSP_NONCE:}"` |
+| **Safe Includes** | Validate dynamic includes | Use `{:allow; :}` with whitelist |
+| **Force Output** | End templates with output marker | `{:^;:}` at end of file |
+| **AJAX Header** | AJAX requests need header | `Requested-With-Ajax: true` |
+
+### 7.2 Secure Template Patterns
+
+#### Safe Dynamic Include
+
+```html
+{:* Declare allowed files *:}
+{:declare; valid_pages >> page1.ntpl page2.ntpl page3.ntpl :}
+
+{:* Safe include with allow list *:}
+{:include;
+  {:allow; valid_pages >> {:;page_name:} :}
+{:else;
+  {:exit; 404 :}
+:}
+```
+
+#### CSP-Compliant Scripts
+
+```html
+{:* Inline script with nonce *:}
+<script nonce="{:;CSP_NONCE:}">
+  (function() {
+    console.log("Safe script");
+  })();
+</script>
+
+{:* Inline style with nonce *:}
+<style nonce="{:;CSP_NONCE:}">
+  .custom-class { color: blue; }
+</style>
+```
+
+#### Auto-Escaped User Data
+
+```html
+{:* CONTEXT data is auto-escaped *:}
+<p>{:;CONTEXT->POST->username:}</p>
+
+{:* Manual escaping for other data *:}
+<p>{:&;untrusted_variable:}</p>
+```
+
+### 7.3 AJAX Request Security
+
+```javascript
+// JavaScript AJAX request
+fetch("/component/route", {
+  method: "POST",
+  headers: {
+    "Requested-With-Ajax": "true",
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: new URLSearchParams({ key: "value" })
+});
+```
+
+**Server-Side AJAX Detection:**
 
 ```python
-STATIC = f"{bp.component['path']}/static"
+# In dispatcher
+self.ajax_request = self.schema_data['CONTEXT']['HEADERS'].get("Requested-With-Ajax") or False
 
-@bp.route("/<path:route>")
-def catch_all(route):
-    file_path = os.path.join(STATIC, route)
-    if os.path.exists(file_path) and not os.path.isdir(file_path):
-        return send_from_directory(STATIC, route)
-    # ... handle as a template route
+# AJAX-specific behavior
+if self.ajax_request:
+    # Skip cookie rotation
+    # Use AJAX template
+    pass
 ```
 
-### 7. Testing (`tests/`)
+### 7.4 Rate Limiting
 
-Components should include their own tests.
+```python
+from app.config import Config
+from app.extensions import limiter
+
+@bp.route("/form/<ltoken>", methods=["POST"])
+@limiter.limit(Config.FORM_LIMITS, error_message="Please wait.")
+@limiter.limit(
+    Config.EMAIL_LIMITS,
+    key_func=lambda: request.form.get("email", ""),
+    error_message="Too many requests from this email."
+)
+def form_post(route, ltoken) -> Response:
+    dispatch = DispatcherFormCustom(request, route, bp.neutral_route, ltoken, "my_form")
+    dispatch.schema_data["dispatch_result"] = dispatch.form_post()
+    return dispatch.view.render()
+```
+
+---
+
+## 8. Testing
+
+### 8.1 Test File Structure
+
+```
+tests/
+├── conftest.py              # Test configuration and fixtures
+├── test_component.py        # Component tests
+├── test_routes.py           # Route tests
+├── test_dispatcher.py       # Dispatcher tests
+└── test_templates.py        # Template tests
+```
+
+### 8.2 Test Configuration (conftest.py)
+
+```python
+"""Test configuration and fixtures."""
+import pytest
+from app import create_app
+from app.config import Config
+
+@pytest.fixture
+def app():
+    """Create application for testing."""
+    app = create_app()
+    app.config["TESTING"] = True
+    app.config["DEBUG"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
+    yield app
+
+@pytest.fixture
+def client(app):
+    """Create test client."""
+    return app.test_client()
+
+@pytest.fixture
+def runner(app):
+    """Create test CLI runner."""
+    return app.test_cli_runner()
+```
+
+### 8.3 Component Tests (test_component.py)
+
+```python
+"""Component tests."""
+import pytest
+
+def test_component_route(client):
+    """Test component root route."""
+    response = client.get("/component-route")
+    assert response.status_code == 200
+    assert b"Component Content" in response.data
+
+def test_component_subroute(client):
+    """Test component subroute."""
+    response = client.get("/component-route/subroute")
+    assert response.status_code == 200
+
+def test_component_404(client):
+    """Test 404 handling."""
+    response = client.get("/component-route/nonexistent")
+    assert response.status_code == 404
+
+def test_component_ajax(client):
+    """Test AJAX endpoint."""
+    response = client.get(
+        "/component-route/ajax",
+        headers={"Requested-With-Ajax": "true"}
+    )
+    assert response.status_code == 200
+```
+
+### 8.4 Form Tests (test_forms.py)
+
+```python
+"""Form validation tests."""
+import pytest
+
+def test_form_get_requires_ltoken(client):
+    """Test form GET requires valid ltoken."""
+    response = client.get("/component-route/form/invalid-token")
+    assert response.status_code == 200
+    assert b"ltoken" in response.data or b"error" in response.data
+
+def test_form_post_validation(client):
+    """Test form POST validation."""
+    response = client.post(
+        "/component-route/form/valid-token",
+        data={
+            "email": "invalid",  # Invalid email
+            "message": "test"
+        }
+    )
+    assert response.status_code == 200
+    assert b"error" in response.data
+
+def test_form_post_success(client):
+    """Test successful form submission."""
+    response = client.post(
+        "/component-route/form/valid-token",
+        data={
+            "email": "valid@example.com",
+            "message": "Test message",
+            "agree": "true"
+        }
+    )
+    assert response.status_code == 200
+    assert b"success" in response.data or b"Thank you" in response.data
+```
+
+### 8.5 Running Tests
 
 ```bash
-# Run tests for this specific component
-pytest src/component/cmp_7000_hellocomp/tests
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run component-specific tests
+pytest src/component/cmp_NNNN_name/tests
+
+# Run with verbose output
+pytest -v src/component/cmp_NNNN_name/tests
+
+# Run with coverage
+pytest --cov=src/component/cmp_NNNN_name src/component/cmp_NNNN_name/tests
+
+# Run full test suite
+pytest
+
+# Run with HTML report
+pytest --html=report.html
+```
+
+### 8.6 Code Quality
+
+```bash
+# Run pylint on component
+pylint src/component/cmp_NNNN_name
+
+# Run pylint with specific options
+pylint --disable=C0114,C0115,C0116 src/component/cmp_NNNN_name
+
+# Check for security issues
+bandit -r src/component/cmp_NNNN_name
+
+# Check code style
+flake8 src/component/cmp_NNNN_name
 ```
 
 ---
 
-## 8. Debugging
+## 9. Implementation Checklist
 
-*   If a component does not load, check the `cmp_` prefix.
-*   If changes in `schema.json` are not reflected, check if an interfering `custom.json` exists or if there is an active DB override in `config.db` table `custom` for the same `comp_uuid`.
-*   Use `{:;local::varname:}` for mutable data and `{:;varname:}` for immutable request data.
+### 9.1 New Component Checklist
+
+- [ ] **Directory Structure**
+  - [ ] Create `src/component/cmp_NNNN_name/`
+  - [ ] Create `route/` subdirectory
+  - [ ] Create `neutral/route/root/` subdirectory
+  - [ ] Create `static/` subdirectory (if needed)
+  - [ ] Create `tests/` subdirectory
+
+- [ ] **Configuration Files**
+  - [ ] Create `manifest.json` with unique UUID
+  - [ ] Create `schema.json` with menu entries
+  - [ ] Create `custom.json` for local overrides (add to .gitignore)
+  - [ ] Create `README.md` with component documentation
+
+- [ ] **Backend Implementation**
+  - [ ] Create `route/__init__.py` with blueprint
+  - [ ] Create `route/routes.py` with route definitions
+  - [ ] Create `route/dispatcher_name.py` (if custom logic needed)
+  - [ ] Create `src/model/component.json` (if database needed)
+
+- [ ] **Frontend Templates**
+  - [ ] Create `neutral/component-init.ntpl` (global snippets)
+  - [ ] Create `neutral/route/index-snippets.ntpl` (component snippets)
+  - [ ] Create `neutral/route/root/data.json` (route metadata)
+  - [ ] Create `neutral/route/root/content-snippets.ntpl` (main template)
+  - [ ] Create `locale-xx.json` files for translations
+
+- [ ] **Security**
+  - [ ] Wrap all UI text with `{:trans; :}`
+  - [ ] Include LTOKEN in form URLs
+  - [ ] Add CSP nonce to inline scripts
+  - [ ] Use `{:allow; :}` for dynamic includes
+  - [ ] End templates with `{:^;:}`
+
+- [ ] **Testing**
+  - [ ] Create `tests/conftest.py`
+  - [ ] Create `tests/test_component.py`
+  - [ ] Run `pytest` for component
+  - [ ] Run `pylint` on Python files
+
+- [ ] **Documentation**
+  - [ ] Update component README.md
+  - [ ] Document routes and endpoints
+  - [ ] Document configuration options
+  - [ ] Document dependencies
+
+### 9.2 Modification Checklist
+
+- [ ] **Analysis**
+  - [ ] Review existing component structure
+  - [ ] Identify files to modify
+  - [ ] Check for custom.json overrides
+  - [ ] Check for config.db overrides
+
+- [ ] **Changes**
+  - [ ] Modify configuration files
+  - [ ] Update routes and dispatchers
+  - [ ] Update templates
+  - [ ] Add/update translations
+
+- [ ] **Testing**
+  - [ ] Run existing tests
+  - [ ] Add tests for new functionality
+  - [ ] Verify no regressions
+
+- [ ] **Documentation**
+  - [ ] Update README.md
+  - [ ] Document changes in changelog
 
 ---
 
-## 9. Admin Hardening Checklist
+## 10. Common Patterns and Examples
 
-For admin/restricted components (configuration panels, maintenance tools, internal ops views), apply this baseline:
+### 10.1 Data Access in Templates
 
-1.  **No public menu entry by default**
-    Keep routes undiscoverable from normal navigation and avoid linking from public pages.
-2.  **IP allow-list**
-    Restrict access to loopback/private/trusted ranges (and validate proxy trust boundaries).
-3.  **Credential gate**
-    Require dedicated admin credentials from environment variables (never hardcoded).
-4.  **CSRF protection on all state-changing actions**
-    Apply to login, save, delete, logout, and any POST/PUT/PATCH/DELETE endpoint.
-5.  **Login rate limiting**
-    Limit brute-force attempts per client IP/session.
-6.  **Strict input validation**
-    Validate IDs, JSON payload types, and allowed operations before persistence.
-7.  **Safe persistence**
-    Use parameterized SQL and explicit schema constraints.
-8.  **Operational guidance**
-    Document that production should disable the admin component unless explicitly required.
-9.  **Cache/restart awareness**
-    Document when changes may require cache invalidation or app restart.
+```html
+{:* schema_data (immutable) *:}
+{:;varname:}
+{:;object->key:}
+{:;array->0->name:}
+{:;CONTEXT->POST->field:}
+{:;CURRENT_COMP_UUID:}
+{:;CSP_NONCE:}
+{:;LTOKEN:}
+{:;HAS_SESSION:}
 
-Recommended practice:
-- Keep admin security env vars reusable as a shared pattern across future admin components.
+{:* schema_local_data (mutable) *:}
+{:;local::varname:}
+{:;local::object->key:}
+{:;local::current->route->h1:}
+{:;local::current->theme->class->container:}
+```
+
+### 10.2 Conditional Rendering
+
+```html
+{:* Boolean check *:}
+{:bool; HAS_SESSION >>
+  <p>Logged in</p>
+:}{:else;
+  <p>Not logged in</p>
+:}
+
+{:* Filled check (has content) *:}
+{:filled; variable >>
+  <p>Has content</p>
+:}{:else;
+  <p>Empty</p>
+:}
+
+{:* Defined check (exists) *:}
+{:defined; variable >>
+  <p>Variable exists</p>
+:}
+
+{:* Same value check *:}
+{:same; /{:;status:}/active/ >>
+  <p>Status is active</p>
+:}
+
+{:* Contains check *:}
+{:contains; /{:;roles:}/admin/ >>
+  <p>User is admin</p>
+:}
+```
+
+### 10.3 Iteration
+
+```html
+{:* Each loop *:}
+{:each; items key item >>
+  <div class="item">
+    <span>{:;key:}</span>
+    <span>{:;item->name:}</span>
+  </div>
+:}
+
+{:* For loop *:}
+{:for; i 1..10 >>
+  <p>Number: {:;i:}</p>
+:}
+
+{:* Nested iteration *:}
+{:each; categories cat_key category >>
+  <h3>{:;category->name:}</h3>
+  {:each; category->items item_key item >>
+    <p>{:;item->name:}</p>
+  :}
+:}
+```
+
+### 10.4 Component References
+
+```html
+{:* Access component by UUID *:}
+{:;uuid->manifest->route:}
+{:;uuid->manifest->name:}
+{:;uuid->path:}
+{:;uuid->schema->data->key:}
+
+{:* Access component by name *:}
+{:;cmp_NNNN_name->manifest->route:}
+
+{:* Cross-component links *:}
+<a href="{:;sign_0yt2sa->manifest->route:}/in">Sign In</a>
+<a href="{:;dashboard_8x90s->manifest->route:}">Dashboard</a>
+```
+
+### 10.5 Caching
+
+```html
+{:* Cache for 300 seconds *:}
+{:cache; /300/ >>
+  <div>Cached content</div>
+:}
+
+{:* Cache with custom ID *:}
+{:cache; /300/custom-id/ >>
+  <div>Cached with ID</div>
+:}
+
+{:* Exclude from cache *:}
+{:!cache;
+  <div>Never cached</div>
+:}
+```
+
+### 10.6 AJAX Fetch in Templates
+
+```html
+{:* Auto-fetch on page load *:}
+{:fetch; |/component/ajax|auto| >>
+  <div class="loading">{:snip; spin-2x :}</div>
+:}
+
+{:* Fetch on click *:}
+{:fetch; |/component/ajax|click| >>
+  <button>Load Content</button>
+:}
+
+{:* Fetch on form submit *:}
+{:fetch; |/component/form|form|form-wrapper| >>
+  <form>...</form>
+:}
+
+{:* Fetch on visible (scroll) *:}
+{:fetch; |/component/ajax|visible| >>
+  <div>Load when visible</div>
+:}
+```
+
+---
+
+## 11. Debugging Tips
+
+Run `pylint` for new Python files before merging.
+
+### 11.1 Common Issues
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| Component not loading | 404 on route | Check `cmp_` prefix |
+| Schema changes not reflected | Old values showing | Check `custom.json` or `config.db` |
+| Template not rendering | Blank page | Ensure `{:^;:}` at end |
+| Form validation failing | Always shows errors | Check `schema.json` rules match fields |
+| AJAX not working | Full page reload | Verify `Requested-With-Ajax` header |
+| Translation not showing | English text only | Check locale file name and structure |
+| Session not persisting | Logged out on refresh | Check cookie settings and domain |
+
+
+---
+
+## 12. Production Deployment
+
+### 12.1 Pre-Deployment Checklist
+
+- [ ] Remove `cmp_7000_hellocomp` if not needed
+- [ ] Set `ALLOWED_HOSTS` in config
+- [ ] Configure `TRUSTED_PROXY_CIDRS` for reverse proxies
+- [ ] Set `DEBUG_EXPIRE=0` in production
+- [ ] Remove debug BIFs from templates
+- [ ] Remove `custom.json` from deployment
+- [ ] Verify all translations are complete
+- [ ] Run full test suite
+- [ ] Run security scan (bandit, pylint)
+
+---
+
+## 13. Usage Examples
+
+### 13.1 Create a New Component
+
+**Prompt:**
+```
+Please create a new component called "Dashboard" with:
+- UUID: dashboard_8x90s
+- Route: /dashboard
+- Menu entries for both logged-in and logged-out users
+- A simple page showing user statistics
+- Spanish and English translations
+- Basic test suite
+```
+
+### 13.2 Modify Existing Component
+
+**Prompt:**
+```
+Please modify cmp_5100_sign to:
+- Add a new route /sign/verify
+- Create a dispatcher for email verification logic
+- Add form validation for verification codes
+- Create templates with proper translations
+- Add tests for the new functionality
+```
+
+### 13.3 Add Form to Component
+
+**Prompt:**
+```
+Please add a contact form to my component with:
+- Email, name, message fields
+- Server-side validation rules in schema.json
+- CSRF protection with LTOKEN and FToken
+- Success/error message handling
+- AJAX submission support
+- Rate limiting on POST
+```
+
+### 13.4 Create Admin Component
+
+**Prompt:**
+```
+Please create an admin component with:
+- UUID: admin_9x00s
+- Route: /admin
+- IP restriction to localhost only
+- Admin credential check from environment
+- No public menu entry
+- CSRF protection on all state-changing actions
+- Rate limiting on login attempts
+- Audit logging for all actions
+```
+
+---
+
+## 14. Best Practices Summary
+
+### 14.1 Architecture
+
+1. **Keep components isolated** - No direct dependencies between components
+2. **Use UUID for references** - Folder names can change, UUIDs are stable
+3. **Follow naming conventions** - `cmp_NNNN_name` for folders, `name_random` for UUIDs
+4. **Separate concerns** - Routes for routing, dispatchers for logic, templates for view
+
+### 14.2 Security
+
+1. **Never trust user input** - Always validate and sanitize
+2. **Use CONTEXT for data** - Auto-escaped and secure
+3. **Implement rate limiting** - Protect against brute force
+4. **Use tokens** - LTOKEN for links, FToken for forms, UTOKEN for sessions
+5. **CSP compliance** - Nonce for all inline scripts/styles
+
+### 14.3 Performance
+
+1. **Cache appropriately** - Use `{:cache; :}` for expensive operations
+2. **Lazy load** - Use AJAX for non-critical content
+3. **Minimize queries** - Batch database operations
+4. **Optimize templates** - Avoid nested loops in templates
+
+### 14.4 Maintainability
+
+1. **Document everything** - README.md, inline comments, docstrings
+2. **Write tests** - Cover all routes and business logic
+3. **Use translations** - All UI text should be translatable
+4. **Version components** - Follow semantic versioning in manifest.json
+
+---
+
+## 15. Quick Reference
+
+### 15.1 File Templates
+
+See sections 3-5 for complete file templates.
+
+### 15.2 NTPL BIF Reference
+
+| BIF | Purpose | Example |
+|-----|---------|---------|
+| `{:;var:}` | Output variable | `{:;name:}` |
+| `{:;local::var:}` | Output local variable | `{:;local::message:}` |
+| `{:trans; text:}` | Translate text | `{:trans; Hello :}` |
+| `{:bool; var >> :}` | Boolean conditional | `{:bool; logged_in >> :}` |
+| `{:filled; var >> :}` | Has content conditional | `{:filled; items >> :}` |
+| `{:each; arr k v >> :}` | Loop through array | `{:each; items key item >> :}` |
+| `{:include; file :}` | Include template | `{:include; header.ntpl :}` |
+| `{:snip; name >> :}` | Define snippet | `{:snip; my-snippet >> :}` |
+| `{:cache; /300/ >> :}` | Cache content | `{:cache; /300/ >> :}` |
+| `{:fetch; \|url\|ev\| >> :}` | AJAX fetch | `{:fetch; \|/ajax\|click\| >> :}` |
+
+### 15.3 Dispatcher Methods
+
+| Method | Purpose | Returns |
+|--------|---------|---------|
+| `Dispatcher.__init__()` | Initialize dispatcher | None |
+| `dispatch.view.render()` | Render template | Response |
+| `dispatch.model.exec()` | Execute database query | dict |
+| `dispatch.session.create()` | Create session | dict |
+| `dispatch.session.close()` | Close session | dict |
+| `dispatch.user.create()` | Create user | dict |
+| `dispatch.user.check_login()` | Verify credentials | dict/None |
+
+### 15.4 Schema Data Keys
+
+| Key | Access | Description |
+|-----|--------|-------------|
+| `CONTEXT` | `{:;CONTEXT->POST->field:}` | Request data |
+| `CURRENT_COMP_UUID` | `{:;CURRENT_COMP_UUID:}` | Component UUID |
+| `CURRENT_COMP_ROUTE` | `{:;CURRENT_COMP_ROUTE:}` | Component route |
+| `CSP_NONCE` | `{:;CSP_NONCE:}` | CSP nonce |
+| `LTOKEN` | `{:;LTOKEN:}` | Link token |
+| `HAS_SESSION` | `{:;HAS_SESSION:}` | Session flag |
+| `CURRENT_USER` | `{:;CURRENT_USER->id:}` | User data |
+
+---
+
+## 16. Additional Resources
+
+- **Official Documentation**: https://franbarinstance.github.io/neutralts-docs/
+- **GitHub Repository**: https://github.com/FranBarInstance/neutral-starter-py
+- **NTPL Syntax Reference**: `docs/templates-neutrats.md`
+- **Dispatcher Documentation**: `docs/dispatcher.md`
+- **Component Guide**: `docs/component.md`
+- **Model Documentation**: `docs/model.md`
+
+---
