@@ -1,6 +1,6 @@
 # Component: Sign (`sign_0yt2sa`)
 
-The **Sign** component manages all user authentication processes, including signing in, signing up, password reminders, and signing out. It follows the standard Neutral PWA architecture, combining Flask back-end logic with NTPL front-end templates.
+The **Sign** component manages all user authentication processes, including signing in, signing up, password reminders, and signing out. It follows the standard Neutral TS Starter Py architecture, combining Flask back-end logic with NTPL front-end templates.
 
 ## Overview
 

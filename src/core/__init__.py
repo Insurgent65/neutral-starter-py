@@ -1,4 +1,4 @@
-"""Core package for Neutral PWA application."""
+"""Core package for Neutral TS Starter Py application."""
 
 import json
 from app.config import Config

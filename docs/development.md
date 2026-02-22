@@ -1,6 +1,6 @@
-# Neutral PWA Starter - Developer Guide
+# Neutral TS Starter Py - Developer Guide
 
-This document is a comprehensive guide for developers looking to understand, extend, and maintain the Neutral PWA Starter application. It covers high-level architecture, core concepts, and detailed implementation workflows.
+This document is a comprehensive guide for developers looking to understand, extend, and maintain the Neutral TS Starter Py application. It covers high-level architecture, core concepts, and detailed implementation workflows.
 
 ---
 

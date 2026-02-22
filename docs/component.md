@@ -1,4 +1,4 @@
-# Components in Neutral PWA Starter
+# Components in Neutral TS Starter Py
 
 This directory is the core of project modularity. Components are isolated functional units that can contain server logic, routes, frontend templates, and configuration.
 
