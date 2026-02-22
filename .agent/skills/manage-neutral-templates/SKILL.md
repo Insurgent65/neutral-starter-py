@@ -50,8 +50,8 @@ Neutral TS uses **BIFs (Built-in Functions)** wrapped in `{::}`.
 
 ### Modularization
 - `{:include; file.ntpl :}`: Include another template.
-- `{:snippet; name >> content :}`: Define a reusable block.
-- `{:snippet; name :}`: Output a defined snippet.
+- `{:snip; name >> content :}`: Define a reusable block.
+- `{:snip; name :}`: Output a defined snippet.
 
 ### Localization
 - `{:trans; Text :}`: Translate text using locale files.
@@ -161,3 +161,33 @@ Use translation files according to scope:
 
 Exception:
 - If a component only needs a very small number of translations, it is acceptable to keep them in `schema.json` for simplicity.
+
+## Use snippets
+
+Snippets are reusable code fragments in templates, similar to functions, that avoid repetition by allowing you to define a block (such as a form) once and use it across multiple templates.
+
+```
+{:snip; my-form >>
+    <form action="{:;action:}" method="{:;method:}">
+      ...
+    </form>
+:}
+```
+
+And then use it like this:
+
+```
+{:snip; my-form :}
+```
+
+You can use `{:snippet; ... :}` or `{:snip; ... :}` interchangeably.
+
+## Use fetch
+
+```ntpl
+{:fetch; {:flg; require :} >> #/data.json :}
+```
+
+```ntpl
+{:fetch; {:flg; require :} >> #/data.json :}
+```
