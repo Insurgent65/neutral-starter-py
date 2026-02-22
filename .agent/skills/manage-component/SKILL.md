@@ -15,6 +15,7 @@ Before using this skill, ensure you understand:
 - Component-based architecture principles
 - Security best practices for web applications
 
+Use `view_file` on `src/component/cmp_7000_hellocomp` as a component example.
 Use `view_file` on `docs/component.md` for component architecture details.
 Use `view_file` on `docs/dispatcher.md` for dispatcher patterns and business logic.
 Use `view_file` on `docs/templates-neutrats.md` for NTPL syntax reference.
