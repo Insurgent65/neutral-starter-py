@@ -107,7 +107,7 @@ Accessed via `{:;local::varname:}` - can be overridden by templates at runtime.
 
 ```ntpl
 {:;local::current->route->title:}
-{:;local::menu->session:->user->name:}
+{:;local::user->name:}
 ```
 
 #### **4.3 CONTEXT (User Input)**
