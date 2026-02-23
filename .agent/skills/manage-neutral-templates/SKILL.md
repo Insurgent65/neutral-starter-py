@@ -264,6 +264,18 @@ User-provided data should be placed in `CONTEXT`:
 All `CONTEXT` variables are automatically HTML-escaped.
 
 ### Security
+
+Use `nonce` in `<script>` and `<style>` tags.
+
+```html
+<script nonce="{:;CSP_NONCE:}">
+    // Script content
+</script>
+<style nonce="{:;CSP_NONCE:}">
+    /* Style content */
+</style>
+```
+
 - Variables are **not evaluated** (template injection safe)
 - Complete variable evaluation requires `{:allow; ... :}`
 - Partial evaluation allowed: `{:; array->{:;key:} :}`
