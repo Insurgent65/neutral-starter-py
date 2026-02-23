@@ -46,18 +46,37 @@ function Set-EnvValue {
 
 function Resolve-Python {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        return @{
-            Executable = "py"
-            Args = @("-3")
+        $supportedPyLaunchers = @("-3.13", "-3.12", "-3.11", "-3.10")
+        foreach ($launcherArg in $supportedPyLaunchers) {
+            try {
+                & py $launcherArg -c "import sys; sys.exit(0)" *> $null
+                if ($LASTEXITCODE -eq 0) {
+                    return @{
+                        Executable = "py"
+                        Args = @($launcherArg)
+                    }
+                }
+            }
+            catch {
+                continue
+            }
         }
     }
     if (Get-Command python -ErrorAction SilentlyContinue) {
-        return @{
-            Executable = "python"
-            Args = @()
+        $versionText = & python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+        $versionText = $versionText.Trim()
+        if ($versionText -match '^(\d+)\.(\d+)$') {
+            $major = [int]$matches[1]
+            $minor = [int]$matches[2]
+            if ($major -eq 3 -and $minor -ge 10 -and $minor -le 13) {
+                return @{
+                    Executable = "python"
+                    Args = @()
+                }
+            }
         }
     }
-    throw "Python 3 is required but was not found."
+    throw "Python 3.10 to 3.13 is required but was not found."
 }
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
