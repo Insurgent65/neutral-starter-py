@@ -1,41 +1,41 @@
 # Bin Scripts
 
-Este directorio contiene scripts operativos del proyecto (tareas de soporte, mantenimiento y utilidades de desarrollo).
+This directory contains operational project scripts (support tasks, maintenance, and development utilities).
 
-## Regla general
+## General Rule
 
-- Usar siempre el entorno virtual local `.venv` para cualquier script Python.
-- Comando base recomendado:
+- Always use the local `.venv` virtual environment for any Python script.
+- Recommended base command:
 
 ```bash
 source .venv/bin/activate && python bin/<script>.py
 ```
 
-En Windows:
+On Windows:
 
 ```bat
 .venv\Scripts\python.exe bin\<script>.py
 ```
 
-## Script disponible
+## Available Scripts
 
 ### `create_user.py`
 
-Crea un usuario en la base de datos usando la lógica interna del proyecto (`core.user.User.create`).
+Creates a user in the database using the project's internal logic (`core.user.User.create`).
 
-Uso:
+Usage:
 
 ```bash
 source .venv/bin/activate && python bin/create_user.py "Nombre" "email@dominio.com" "password" "1990-05-20"
 ```
 
-Opcionales:
+Optional arguments:
 
 - `--locale` (default: `es`)
 - `--region`
 - `--properties` (JSON)
 
-Ejemplo:
+Example:
 
 ```bash
 source .venv/bin/activate && python bin/create_user.py "Ana" "ana@example.com" "MiPass123!" "1992-11-03" --locale es --region ES --properties "{\"role\":\"admin\"}"
@@ -43,20 +43,20 @@ source .venv/bin/activate && python bin/create_user.py "Ana" "ana@example.com" "
 
 ### `bootstrap_db.py`
 
-Inicializa el esquema base de bases de datos para una instalacion limpia.
+Initializes the base database schema for a clean installation.
 
-Incluye:
-- `pwa`: tablas `uid`, `user*`, `pin`, `role`, `user_role` + roles base.
-- `safe`: tabla `session`.
-- `files`: prueba de conexion/creacion de la base.
+Includes:
+- `pwa`: `uid`, `user*`, `pin`, `role`, `user_role` tables + base roles.
+- `safe`: `session` table.
+- `files`: database connection/creation check.
 
-Uso basico:
+Basic usage:
 
 ```bash
 source .venv/bin/activate && python bin/bootstrap_db.py
 ```
 
-Con URLs custom (recomendado para pruebas locales):
+With custom URLs (recommended for local testing):
 
 ```bash
 source .venv/bin/activate && python bin/bootstrap_db.py \
@@ -67,20 +67,21 @@ source .venv/bin/activate && python bin/bootstrap_db.py \
 
 ### `install.sh` (Linux/macOS)
 
-Instalador interactivo para instalación limpia desde tag del repositorio.
+Interactive installer for a clean installation from a repository version.
 
-Incluye:
-- listado de hasta 15 tags y selección de versión
-- selección de directorio destino
-- creación de `.venv` + instalación de `requirements.txt`
-- copia de `config/.env.example` a `config/.env` + generación de `SECRET_KEY`
-- generación automática de rutas aleatorias en:
-  - `src/component/cmp_7040_admin/custom.json` -> `/admin-[aleatorio]`
-  - `src/component/cmp_7050_dev_admin/custom.json` -> `/dev-admin-[aleatorio]`
+Includes:
+- option to install the current development version (the `master` branch)
+- list of up to 15 tags and version selection
+- destination directory selection
+- `.venv` creation + `requirements.txt` installation
+- copy from `config/.env.example` to `config/.env` + `SECRET_KEY` generation
+- automatic generation of randomized routes in:
+  - `src/component/cmp_7040_admin/custom.json` -> `/admin-[random]`
+  - `src/component/cmp_7050_dev_admin/custom.json` -> `/dev-admin-[random]`
 - `bootstrap_db.py`
-- creación obligatoria de usuario `dev` (solicita datos) y actualización de `DEV_ADMIN_*` en `.env`
+- required creation of `dev` user (prompts for data) and update of `DEV_ADMIN_*` in `.env`
 
-Uso remoto:
+Remote usage:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/FranBarInstance/neutral-starter-py/master/bin/install.sh | sh
@@ -88,21 +89,21 @@ curl -fsSL https://raw.githubusercontent.com/FranBarInstance/neutral-starter-py/
 
 ### `install.ps1` (Windows PowerShell)
 
-Instalador interactivo equivalente para Windows.
+Equivalent interactive installer for Windows.
 
-Uso remoto:
+Remote usage:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr -useb https://raw.githubusercontent.com/FranBarInstance/neutral-starter-py/master/bin/install.ps1 | iex"
 ```
 
-## Convención para futuros scripts
+## Convention for Future Scripts
 
-- Nombre: `snake_case.py` (ejemplo: `sync_data.py`).
-- Entrada única por Python (sin wrappers `.sh`/`.bat`, salvo necesidad real).
-- Argumentos con `argparse` y `--help`.
-- Validar entradas y devolver códigos de salida claros:
+- Name: `snake_case.py` (example: `sync_data.py`).
+- Single Python entry point (without `.sh`/`.bat` wrappers, unless truly needed).
+- Arguments with `argparse` and `--help`.
+- Validate inputs and return clear exit codes:
   - `0`: OK
-  - `1`: error de ejecución
-  - `2`: error de argumentos
-- Mantener scripts idempotentes cuando sea posible.
+  - `1`: execution error
+  - `2`: argument error
+- Keep scripts idempotent whenever possible.
