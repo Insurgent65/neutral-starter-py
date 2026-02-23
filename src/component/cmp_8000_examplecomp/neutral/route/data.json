@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Hello Component",
+                "description": "Visual showcase component with snippets, AJAX and modals",
+                "h1": "Hello Component"
+            }
+        }
+    }
+}

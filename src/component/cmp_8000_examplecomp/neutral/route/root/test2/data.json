@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Hello Component Test Two",
+                "description": "Route that receives GET form data",
+                "h1": "Hello Component Test Two"
+            }
+        }
+    }
+}
