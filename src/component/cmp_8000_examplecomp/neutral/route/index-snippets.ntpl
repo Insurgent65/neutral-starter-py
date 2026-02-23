@@ -1,0 +1,46 @@
+{:* Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE) *:}
+
+{:*
+    Data for all {:;hellocomp_0yt2sa->manifest->route:}/* routes
+*:}
+{:data; {:flg; require :} >> #/data.json :}
+
+{:*
+    Locale for all {:;hellocomp_0yt2sa->manifest->route:}/* routes
+*:}
+{:locale;
+    #/locale-{:lang;:}.json
+:}{:else;
+    {:locale; #/locale-en.json :}
+:}
+
+{:*
+    Route-wide snippet for this component
+*:}
+{:snip; hellocomp_0yt2sa-route-snippet >>
+    {:*
+        Load locale object
+    *:}
+    {:locale; #/../obj/locale-obj-comp.json  :}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">{:trans; Route snippet for the full component :}</h5>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4">
+                    <img src="{:;hellocomp_0yt2sa->manifest->route:}/comp.webp" alt="component" class="img-fluid rounded-4 shadow-sm">
+                </div>
+                <div class="col-12 col-md-8">
+                    <p class="mb-2 text-secondary">{:trans; This block is available for all routes in this component. :}</p>
+                    <div class="small">
+                        <div><strong>PATH:</strong> {:;CONTEXT->PATH:}</div>
+                        <div><strong>CURRENT_COMP_ROUTE:</strong> {:;CURRENT_COMP_ROUTE:}</div>
+                        <div><strong>CURRENT_COMP_UUID:</strong> {:;CURRENT_COMP_UUID:}</div>
+                        <div><strong>Message:</strong> {:trans; {:;local::message:} :}</div>
+                        <div><strong>Trans reference:</strong> {:trans; ref:example:reference :}</div>
+                        <div><strong>Obj message:</strong> {:obj; #/../obj/comp.json >> {:trans; {:;local::message:} :} :}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+:}

@@ -1,0 +1,11 @@
+{
+    "data": {
+        "current": {
+            "route": {
+                "title": "Hello Component Test One",
+                "description": "Route with custom dispatcher logic",
+                "h1": "Hello Component Test One"
+            }
+        }
+    }
+}

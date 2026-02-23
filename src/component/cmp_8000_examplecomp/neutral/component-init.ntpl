@@ -1,0 +1,11 @@
+{:* Copyright (C) 2025 https://github.com/FranBarInstance/neutral-starter-py (See LICENCE) *:}
+
+{:*
+    Global snippet available in all app routes
+*:}
+{:snip; examplecomp_global_snippet >>
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+        <div>{:trans; Global snippet from Example Component :}</div>
+    </div>
+:}

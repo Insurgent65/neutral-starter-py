@@ -1,0 +1,7 @@
+{
+    "uuid": "examplecomp_0yt2sa",
+    "name": "Example Component",
+    "description": "Visual example component showcasing all application features with Bootstrap 5 styling",
+    "version": "0.0.0",
+    "route": "/example-component"
+}
