@@ -53,7 +53,7 @@ src/component/cmp_NNNN_name/
 │           ├── data.json                 # Route metadata
 │           ├── content-snippets.ntpl     # Content snippets for main route
 │           └── subroute_name/            # Maps to subroute_name, e.g. /example/subroute_name
-│               ├── data.json             # Local data, usually title, subtitle, etc.
+│               ├── data.json             # Local data, usually title, subtitle, h1, etc.
 │               └── content-snippets.ntpl # Content snippets for subroute
 ├── static/                               # CSS, JS, images
 ├── src/                                  # Backend logic snippets
