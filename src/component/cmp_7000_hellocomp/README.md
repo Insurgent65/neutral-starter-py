@@ -84,7 +84,7 @@ cmp_7000_hellocomp/
 │       ├── index-snippets.ntpl   # Snippets for all routes
 │       ├── locale-{lang}.json    # Route translations
 │       └── root/
-│           ├── content-snippets.ntpl          # Route /hello-component contents
+│           ├── content-snippets.ntpl          # Contents for /hello-component
 │           ├── data.json
 │           ├── ajax/
 │           │   ├── example/
