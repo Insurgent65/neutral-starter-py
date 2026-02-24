@@ -7,7 +7,7 @@ description: Create or modify Neutral TS web template files (.ntpl) following th
 
 Create, modify, and manage Neutral TS (NTPL) template files following the official Neutral TS syntax, security standards, and architectural patterns.
 
-Use `view_file` on `src/component/cmp_7000_hellocomp` as a component example.
+Use `view_file` on `src/component/cmp_7000_hellocomp` or `_src/component/cmp_7000_hellocomp` as a component example.
 Use `view_file` on `docs/templates-neutrats.md` for more template options.
 Use `view_file` on `docs/templates-neutrats-ajax.md` for AJAX requests.
 Use `view_file` on `docs/development-style-guide.md` for more style guide.
@@ -264,6 +264,18 @@ User-provided data should be placed in `CONTEXT`:
 All `CONTEXT` variables are automatically HTML-escaped.
 
 ### Security
+
+Use `nonce` in `<script>` and `<style>` tags.
+
+```html
+<script nonce="{:;CSP_NONCE:}">
+    // Script content
+</script>
+<style nonce="{:;CSP_NONCE:}">
+    /* Style content */
+</style>
+```
+
 - Variables are **not evaluated** (template injection safe)
 - Complete variable evaluation requires `{:allow; ... :}`
 - Partial evaluation allowed: `{:; array->{:;key:} :}`

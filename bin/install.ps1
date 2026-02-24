@@ -1,7 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $RepoUrl = "https://github.com/FranBarInstance/neutral-starter-py.git"
-$DefaultBranch = "master"
+$FallbackDefaultBranch = "main"
+$DefaultBranch = $FallbackDefaultBranch
 
 function Read-Value {
     param(
@@ -83,6 +84,19 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "git is required but was not found."
 }
 
+try {
+    $symrefOutput = git ls-remote --symref $RepoUrl HEAD 2>$null
+    foreach ($line in $symrefOutput) {
+        if ($line -match '^ref:\s+refs/heads/([^\s]+)\s+HEAD$') {
+            $DefaultBranch = $matches[1]
+            break
+        }
+    }
+}
+catch {
+    $DefaultBranch = $FallbackDefaultBranch
+}
+
 Write-Host "Fetching latest tags from repository..."
 $tagLines = git ls-remote --tags --refs $RepoUrl
 $tags = @()
@@ -103,13 +117,13 @@ $sortedTags = $tags |
     Select-Object -First 15
 
 if (-not $sortedTags -or $sortedTags.Count -eq 0) {
-    Write-Host "No tags found. Falling back to branch: $DefaultBranch"
-    $sortedTags = @($DefaultBranch)
+    Write-Host "No tags found."
 }
 
 Write-Host "Available versions:"
+Write-Host ("  1) development ({0} latest)" -f $DefaultBranch)
 for ($i = 0; $i -lt $sortedTags.Count; $i++) {
-    Write-Host ("  {0}) {1}" -f ($i + 1), $sortedTags[$i])
+    Write-Host ("  {0}) {1}" -f ($i + 2), $sortedTags[$i])
 }
 
 $selection = Read-Value -Prompt "Select version number" -Default "1"
@@ -118,11 +132,17 @@ if (-not ($selection -match '^\d+$')) {
 }
 
 $selectionIndex = [int]$selection
-if ($selectionIndex -lt 1 -or $selectionIndex -gt $sortedTags.Count) {
-    throw "Version selection out of range (1..$($sortedTags.Count))."
+$totalOptions = $sortedTags.Count + 1
+if ($selectionIndex -lt 1 -or $selectionIndex -gt $totalOptions) {
+    throw "Version selection out of range (1..$totalOptions)."
 }
 
-$selectedTag = $sortedTags[$selectionIndex - 1]
+$selectedRef = $DefaultBranch
+$selectedLabel = "development ($DefaultBranch latest)"
+if ($selectionIndex -gt 1) {
+    $selectedRef = $sortedTags[$selectionIndex - 2]
+    $selectedLabel = $selectedRef
+}
 $installDir = Read-Value -Prompt "Installation directory" -Default (Get-Location).Path
 
 if (Test-Path $installDir) {
@@ -135,13 +155,8 @@ else {
     New-Item -ItemType Directory -Path $installDir | Out-Null
 }
 
-Write-Host "Cloning version '$selectedTag' into '$installDir'..."
-if ($selectedTag -eq $DefaultBranch) {
-    git clone --depth 1 --branch $DefaultBranch $RepoUrl $installDir
-}
-else {
-    git clone --depth 1 --branch $selectedTag $RepoUrl $installDir
-}
+Write-Host "Cloning version '$selectedLabel' into '$installDir'..."
+git clone --depth 1 --branch $selectedRef $RepoUrl $installDir
 
 Set-Location $installDir
 

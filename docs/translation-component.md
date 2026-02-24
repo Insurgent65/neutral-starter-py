@@ -1,4 +1,4 @@
-# Translation Guide (`translate-component`)
+# Translation Guide
 
 > [!NOTE]
 > You can ask the AI to translate a full component using the `translate-component` skill.
@@ -37,6 +37,90 @@ Put translations in component `schema.json` when they must be available broadly,
 Typical location:
 
 - `inherit.locale.trans`
+
+Example:
+```json
+{
+    "inherit": {
+        "locale": {
+            "trans": {
+                "en": {},
+                "es": {
+                    "User": "Usuario",
+                    "Sign in": "Iniciar sesión",
+                    "Sign out": "Cerrar sesión"
+                }
+            }
+        },
+        "data": {
+            "drawer": {
+                "menu": {
+                    "session:": {
+                        "user": {
+                            "name": "User",
+                            "tabs": "user",
+                            "icon": "x-icon-user"
+                        }
+                    },
+                    "session:true": {
+                        "user": {
+                            "name": "User",
+                            "tabs": "user",
+                            "icon": "x-icon-user"
+                        }
+                    }
+                }
+            },
+            "menu": {
+                "session:": {
+                    "user": {
+                        "login": {
+                            "text": "Sign in",
+                            "link": "[:;data->sign_0yt2sa->manifest->route:]/in",
+                            "icon": "x-icon-sign-in"
+                        }
+                    }
+                },
+                "session:true": {
+                    "user": {
+                        "logout": {
+                            "text": "Sign out",
+                            "link": "[:;data->sign_0yt2sa->manifest->route:]/out",
+                            "icon": "x-icon-sign-out"
+                        }
+                    }
+                }
+            },
+            "navbar": {
+                "menu": {
+                    "session:": {
+                        "signin": {
+                            "name": "Sign in",
+                            "link": "#loginModal",
+                            "icon": "x-icon-sign-in",
+                            "prop": {
+                                "data-bs-toggle": "modal",
+                                "data-bs-target": "#loginModal"
+                            }
+                        }
+                    },
+                    "session:true": {
+                        "signout": {
+                            "name": "Sign out",
+                            "link": "#logoutModal",
+                            "icon": "x-icon-sign-out",
+                            "prop": {
+                                "data-bs-toggle": "modal",
+                                "data-bs-target": "#logoutModal"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
 
 ### Route/Component Template Translations (locale files)
 
@@ -153,7 +237,7 @@ Examples:
 - Component-level route locale: `src/component/<cmp>/neutral/route/locale-xx.json`
 - Subroute-only locale: `src/component/<cmp>/neutral/route/root/<subroute>/locale.json`
 
-## 5. Workflow with `translate-component`
+## 5. Workflow
 
 Recommended workflow:
 
@@ -161,3 +245,49 @@ Recommended workflow:
 2. Ask AI to run `translate-component` for the target component.
 3. Review generated/updated `locale-xx.json` files.
 4. Keep shared/global translation keys in `schema.json` when needed app-wide.
+
+## 6. Strategy for translating content
+
+The Neutral TS translation system is designed to translate the user interface of components. Therefore, it is not intended to translate the content of components.
+
+Taking advantage of Neutral TS features, we can load specific content for each language. We can see an example in the component `cmp_7000_hellocomp` at `src/component/cmp_7000_hellocomp/neutral/route/root/translating-content`.
+
+In `content-snippets.ntpl` we have the following:
+
+```ntpl
+{:snip; current:template:body-main-content >>
+    <div class="container">
+        {:include; #/content-{:lang;:}.ntpl :}
+        {:else; {:include; #/content-en.ntpl :} :}
+    </div>
+:}
+```
+
+At the same time, in the same path we have different files for each language, `content-en.ntpl`, `content-es.ntpl`, etc.
+
+What happens is that with `{:include; #/content-{:lang;:}.ntpl :}` it will try to load the file for the current language, and if it doesn't exist, it will load the default file `content-en.ntpl`.
+
+This same strategy can be followed with snippets:
+
+```ntpl
+{:snip; content-en >>
+    English
+:}
+{:snip; content-es >>
+    Español
+:}
+```
+
+And then in `content-snippets.ntpl` we can have the following:
+
+```ntpl
+{:snip; current:template:body-main-content >>
+    <div class="container">
+        {:snip; content-{:lang;:} :}{:else; {:snip; content-en :} :}
+    </div>
+:}
+```
+
+`{:lang;:}` contains the current language, for example `en`.
+
+---

@@ -3,7 +3,7 @@
 set -eu
 
 REPO_URL="https://github.com/FranBarInstance/neutral-starter-py.git"
-DEFAULT_BRANCH="master"
+FALLBACK_DEFAULT_BRANCH="main"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -75,6 +75,11 @@ read_password() {
 need_cmd git
 need_cmd python3
 
+DEFAULT_BRANCH="$(git ls-remote --symref "$REPO_URL" HEAD 2>/dev/null | awk '/^ref:/ { sub("refs/heads/", "", $2); print $2; exit }')"
+if [ -z "$DEFAULT_BRANCH" ]; then
+  DEFAULT_BRANCH="$FALLBACK_DEFAULT_BRANCH"
+fi
+
 PYTHON_VERSION="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 PYTHON_MAJOR="$(printf "%s" "$PYTHON_VERSION" | cut -d. -f1)"
 PYTHON_MINOR="$(printf "%s" "$PYTHON_VERSION" | cut -d. -f2)"
@@ -85,19 +90,24 @@ fi
 
 echo "Fetching latest tags from repository..."
 TAG_LIST="$(git ls-remote --tags --refs "$REPO_URL" | awk '{print $2}' | sed 's#refs/tags/##' | sort -Vr | head -n 15)"
-if [ -z "$TAG_LIST" ]; then
-  echo "No tags found. Falling back to branch: $DEFAULT_BRANCH"
-  TAG_LIST="$DEFAULT_BRANCH"
-fi
 
 echo "Available versions:"
-index=1
-printf "%s\n" "$TAG_LIST" | while IFS= read -r tag; do
-  printf "  %s) %s\n" "$index" "$tag"
-  index=$((index + 1))
-done
+echo "  1) development ($DEFAULT_BRANCH latest)"
+index=2
+if [ -n "$TAG_LIST" ]; then
+  printf "%s\n" "$TAG_LIST" | while IFS= read -r tag; do
+    printf "  %s) %s\n" "$index" "$tag"
+    index=$((index + 1))
+  done
+else
+  echo "  (no tags found)"
+fi
 
-TAG_COUNT="$(printf "%s\n" "$TAG_LIST" | wc -l | tr -d ' ')"
+TAG_COUNT=0
+if [ -n "$TAG_LIST" ]; then
+  TAG_COUNT="$(printf "%s\n" "$TAG_LIST" | wc -l | tr -d ' ')"
+fi
+TOTAL_OPTIONS=$((TAG_COUNT + 1))
 SELECTED_INDEX="$(prompt_default "Select version number" "1")"
 case "$SELECTED_INDEX" in
   *[!0-9]*|"")
@@ -105,11 +115,19 @@ case "$SELECTED_INDEX" in
     exit 1
     ;;
 esac
-if [ "$SELECTED_INDEX" -lt 1 ] || [ "$SELECTED_INDEX" -gt "$TAG_COUNT" ]; then
-  echo "ERROR: selection out of range (1..$TAG_COUNT)" >&2
+if [ "$SELECTED_INDEX" -lt 1 ] || [ "$SELECTED_INDEX" -gt "$TOTAL_OPTIONS" ]; then
+  echo "ERROR: selection out of range (1..$TOTAL_OPTIONS)" >&2
   exit 1
 fi
-SELECTED_TAG="$(printf "%s\n" "$TAG_LIST" | sed -n "${SELECTED_INDEX}p")"
+
+if [ "$SELECTED_INDEX" -eq 1 ]; then
+  SELECTED_REF="$DEFAULT_BRANCH"
+  SELECTED_LABEL="development ($DEFAULT_BRANCH latest)"
+else
+  TAG_INDEX=$((SELECTED_INDEX - 1))
+  SELECTED_REF="$(printf "%s\n" "$TAG_LIST" | sed -n "${TAG_INDEX}p")"
+  SELECTED_LABEL="$SELECTED_REF"
+fi
 
 INSTALL_DIR_DEFAULT="$(pwd)"
 INSTALL_DIR="$(prompt_default "Installation directory" "$INSTALL_DIR_DEFAULT")"
@@ -120,12 +138,8 @@ if [ -e "$INSTALL_DIR" ] && [ "$(ls -A "$INSTALL_DIR" 2>/dev/null || true)" ]; t
 fi
 mkdir -p "$INSTALL_DIR"
 
-echo "Cloning version '$SELECTED_TAG' into '$INSTALL_DIR'..."
-if [ "$SELECTED_TAG" = "$DEFAULT_BRANCH" ]; then
-  git clone --depth 1 --branch "$DEFAULT_BRANCH" "$REPO_URL" "$INSTALL_DIR"
-else
-  git clone --depth 1 --branch "$SELECTED_TAG" "$REPO_URL" "$INSTALL_DIR"
-fi
+echo "Cloning version '$SELECTED_LABEL' into '$INSTALL_DIR'..."
+git clone --depth 1 --branch "$SELECTED_REF" "$REPO_URL" "$INSTALL_DIR"
 
 cd "$INSTALL_DIR"
 
